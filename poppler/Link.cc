@@ -126,6 +126,10 @@ LinkAction *LinkAction::parseAction(Object *obj, GooString *baseURI) {
   } else if (obj2.isName("SetOCGState")) {
     action = new LinkOCGState(obj);
 
+  // Reset Form action
+  } else if (obj2.isName("ResetForm")) {
+	action = new LinkResetForm(obj);
+
   // unknown action
   } else if (obj2.isName()) {
     action = new LinkUnknown(obj2.getName());
@@ -877,6 +881,23 @@ LinkOCGState::StateList::~StateList() {
   if (list)
     deleteGooList(list, Ref);
 }
+
+//------------------------------------------------------------------------
+// LinkResetForm
+//------------------------------------------------------------------------
+
+LinkResetForm::LinkResetForm(Object *obj) {
+	printf ("POPPLER - Link.cc new reset form link created!\n");
+	Object obj1;
+
+	fieldList = NULL;
+	flags = 0;
+	
+}
+
+LinkResetForm::~LinkResetForm() {
+}
+
 
 //------------------------------------------------------------------------
 // LinkUnknown

@@ -56,6 +56,7 @@ enum LinkActionKind {
   actionSound,			// sound action
   actionJavaScript,		// JavaScript action
   actionOCGState,               // Set-OCG-State action
+  actionResetForm,		// Reset Form action
   actionUnknown			// anything else
 };
 
@@ -441,6 +442,30 @@ public:
 private:
   GooList *stateList;
   GBool preserveRB;
+};
+
+//------------------------------------------------------------------------
+// LinkResetForm
+//------------------------------------------------------------------------
+
+class LinkResetForm: public LinkAction {
+public:
+
+  LinkResetForm(Object *obj);
+
+  virtual ~LinkResetForm();
+
+  virtual GBool isOk() { return 1; }	//No required dict entries for this..
+
+  virtual LinkActionKind getKind() { return actionResetForm; }
+
+  GooList *getFieldList() { return fieldList; }	//TODO core should store/return list of pointers to the formFields
+  unsigned getFlags() { return flags; }
+
+protected:
+
+  GooList *fieldList;
+  unsigned flags;		//inheritable ?FIXME 
 };
 
 //------------------------------------------------------------------------
