@@ -160,6 +160,11 @@ LinkAction *FormWidget::getAdditionalAction(Annot::FormAdditionalActionsType typ
   return widget ? widget->getFormAdditionalAction(type) : NULL;
 }
 
+void FormWidget::reset()
+{
+	field->resetField();
+}
+
 FormWidgetButton::FormWidgetButton (PDFDoc *docA, Object *aobj, unsigned num, Ref ref, FormField *p) :
 	FormWidget(docA, aobj, num, ref, p)
 {
@@ -302,6 +307,7 @@ int FormWidgetText::getMaxLen () const
 
 void FormWidgetText::setContent(GooString* new_content)
 {
+  printf ("TEST - setContent!\n");
   if (isReadOnly()) {
     error(errInternal, -1, "FormWidgetText::setContentCopy called on a read only field\n");
     return;
@@ -968,6 +974,10 @@ FormFieldButton::~FormFieldButton()
     gfree(siblings);
 }
 
+void FormFieldButton::resetField() {
+	//TODO
+}
+
 //------------------------------------------------------------------------
 // FormFieldText
 //------------------------------------------------------------------------
@@ -1004,6 +1014,9 @@ FormFieldText::FormFieldText(PDFDoc *docA, Object *aobj, const Ref& ref, FormFie
   }
   obj1.free();
 
+  if (Form::fieldLookup(dict, "DV", &obj1)->isString()) {
+	printf ("POPPLER DV in text field.! %s\n",obj1.getString()->getCString());
+  }
   if (Form::fieldLookup(dict, "V", &obj1)->isString()) {
     if (obj1.getString()->hasUnicodeMarker()) {
       if (obj1.getString()->getLength() > 2)
@@ -1035,6 +1048,7 @@ GooString* FormFieldText::getContentCopy ()
 
 void FormFieldText::setContentCopy (GooString* new_content)
 {
+  printf ("POPPLER - setContentCopy!\n");
   delete content;
   content = NULL;
 
@@ -1053,6 +1067,37 @@ void FormFieldText::setContentCopy (GooString* new_content)
   obj.getDict()->set("V", &obj1);
   xref->setModifiedObject(&obj, ref);
   updateChildrenAppearance();
+}
+
+void FormFieldText::resetField ()
+{
+  Object obj1;
+  Dict* dict = obj.getDict();
+  GooString *content = NULL;
+
+  printf ("POPPLER form - resetField ()\n");
+
+  if (Form::fieldLookup(dict, "DV", &obj1)->isString()) {
+	printf ("POPPLER form - resetField () DV - %s\n", obj1.getString()->getCString());
+
+    if (obj1.getString()->hasUnicodeMarker()) {
+      if (obj1.getString()->getLength() > 2)
+        content = obj1.getString()->copy();
+    } else if (obj1.getString()->getLength() > 0) {
+      //non-unicode string -- assume pdfDocEncoding and try to convert to UTF16BE
+      int tmp_length;
+      char* tmp_str = pdfDocEncodingToUTF16(obj1.getString(), &tmp_length);
+      content = new GooString(tmp_str, tmp_length);
+      delete [] tmp_str;
+    }
+
+  } else {
+	content = new GooString("");
+  }
+	//TODO for non-terminal field..
+	//(All descendants of the specified fields in the field hierarchy are reset as well.)
+  setContentCopy (content);
+  delete content;
 }
 
 FormFieldText::~FormFieldText()
@@ -1134,6 +1179,9 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object *aobj, const Ref& ref, For
   }
   obj1.free();
 
+  //if (Form::fieldLookup(dict, "DV", &obj1)->isString()) {
+	//printf ("POPPLER DV in choice field.! %s\n",Form::fieldLookup(dict, "DV", &obj1));
+  //}
   // Find selected items
   // Note: PDF specs say that /V has precedence over /I, but acroread seems to
   // do the opposite. We do the same.
@@ -1364,6 +1412,11 @@ GooString *FormFieldChoice::getSelectedChoice() {
   return NULL;
 }
 
+void FormFieldChoice::resetField()
+{
+	//TODO
+}
+  
 //------------------------------------------------------------------------
 // FormFieldSignature
 //------------------------------------------------------------------------
@@ -1377,6 +1430,9 @@ FormFieldSignature::~FormFieldSignature()
 
 }
 
+void FormFieldSignature::resetField()
+{
+}
 #ifdef DEBUG_FORMS
 void FormFieldSignature::print(int indent)
 {

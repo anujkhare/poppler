@@ -114,6 +114,7 @@ public:
   AnnotWidget *getWidgetAnnotation() const { return widget; }
 
   virtual void updateWidgetAppearance() = 0;
+  void reset();
 
 #ifdef DEBUG_FORMS
   void print(int indent = 0);
@@ -283,6 +284,8 @@ public:
   int getNumWidgets() { return terminal ? numChildren : 0; }
   FormWidget *getWidget(int i) { return terminal ? widgets[i] : NULL; }
 
+  virtual void resetField () {}
+
   // only implemented in FormFieldButton
   virtual void fillChildrenSiblingsID ();
 
@@ -357,6 +360,7 @@ public:
   void print(int indent = 0);
 #endif
 
+  virtual void resetField();
   virtual ~FormFieldButton();
 protected:
   void updateState(char *state);
@@ -383,6 +387,7 @@ public:
   GooString* getContent () { return content; }
   GooString* getContentCopy ();
   void setContentCopy (GooString* new_content);
+  virtual void resetField ();
   virtual ~FormFieldText();
 
   bool isMultiline () const { return multiline; }
@@ -418,6 +423,7 @@ class FormFieldChoice: public FormField {
 public:
   FormFieldChoice(PDFDoc *docA, Object *aobj, const Ref& ref, FormField *parent, std::set<int> *usedParents);
 
+  virtual void resetField();
   virtual ~FormFieldChoice();
 
   int getNumChoices() { return numChoices; }
@@ -487,6 +493,7 @@ class FormFieldSignature: public FormField {
 public:
   FormFieldSignature(PDFDoc *docA, Object *dict, const Ref& ref, FormField *parent, std::set<int> *usedParents);
 
+  virtual void resetField();
   virtual ~FormFieldSignature();
 
 #ifdef DEBUG_FORMS

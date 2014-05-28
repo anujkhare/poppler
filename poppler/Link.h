@@ -459,13 +459,15 @@ public:
 
   virtual LinkActionKind getKind() { return actionResetForm; }
 
-  GooList *getFieldList() { return fieldList; }	//TODO core should store/return list of pointers to the formFields
-  unsigned getFlags() { return flags; }
+  enum IncludeExcludeFlag { IncludeFlag, ExcludeFlag};
+
+  GooList *getFieldList() { return fieldList; }	//core should store/return list of pointers to the FormWidgets
+  IncludeExcludeFlag getFlag() { return flag; }
 
 protected:
 
   GooList *fieldList;
-  unsigned flags;		//inheritable ?FIXME 
+  IncludeExcludeFlag flag;		//inheritable
 };
 
 //------------------------------------------------------------------------
