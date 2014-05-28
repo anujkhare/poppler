@@ -105,6 +105,7 @@ void                  poppler_form_field_choice_toggle_item      (PopplerFormFie
 void                  poppler_form_field_choice_set_text         (PopplerFormField *field,
 								  const gchar      *text);
 gchar                *poppler_form_field_choice_get_text         (PopplerFormField *field);
+void				  poppler_form_reset_form					 ();
 
 G_END_DECLS
 

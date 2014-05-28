@@ -144,6 +144,11 @@ poppler_action_free (PopplerAction *action)
 		if (action->javascript.script)
 			g_free (action->javascript.script);
 		break;
+	case POPPLER_ACTION_RESETFORM:
+		printf ("GLIBPOPPLER reset action free\n");
+		if (action->reset_form.field_list)
+			g_free (action->reset_form.field_list);
+		break;
 	default:
 		break;
 	}
@@ -152,6 +157,12 @@ poppler_action_free (PopplerAction *action)
 	g_slice_free (PopplerAction, action);
 }
 
+gpointer *
+copy_form_field (gconstpointer src,
+		 gpointer data)
+{
+	//TODO
+}
 /**
  * poppler_action_copy:
  * @action: a #PopplerAction
@@ -221,6 +232,12 @@ poppler_action_copy (PopplerAction *action)
 	case POPPLER_ACTION_JAVASCRIPT:
 		if (action->javascript.script)
 			new_action->javascript.script = g_strdup (action->javascript.script);
+		break;
+	case POPPLER_ACTION_RESETFORM:
+		printf ("GLIBPOPPLER reset action copy\n");
+		if (action->reset_form.field_list) {
+			new_action->reset_action.field_list = g_list_copy_deep (action->reset_form.field_list, (GCopyFunc)copy_form_field, NULL);
+		}
 		break;
 	default:
 		break;
@@ -534,6 +551,21 @@ build_javascript (PopplerAction *action,
 }
 
 static void
+build_reset_form (PopplerAction *action,
+		  LinkResetForm *link)
+{
+	GooList list;
+
+	action->reset_form.field_list = NULL;
+
+	list = link->getFieldList();
+	if (list) {
+		//TODO here, construct final list of all the fields to be reset, but how..
+	//	action->reset_form.field_list = list;
+	}
+
+}
+static void
 build_rendition (PopplerAction *action,
 		 LinkRendition *link)
 {
@@ -673,6 +705,11 @@ _poppler_action_new (PopplerDocument *document,
 	case actionJavaScript:
 		action->type = POPPLER_ACTION_JAVASCRIPT;
 		build_javascript (action, dynamic_cast<LinkJavaScript*> (link));
+		break;
+	case actionResetForm:
+		action->type = POPPLER_ACTION_RESETFORM;
+		build_reset_form (action, dynamic_cast<LinkResetForm*> (link));
+		printf ("GLIB POPPLER :build new poppler (reset form) action\n");
 		break;
 	case actionUnknown:
 	default:

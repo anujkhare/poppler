@@ -52,7 +52,9 @@ typedef enum
 	POPPLER_ACTION_MOVIE,		/* movie action */
 	POPPLER_ACTION_RENDITION,       /* rendition action */
 	POPPLER_ACTION_OCG_STATE,       /* Set-OCG-State action */
-	POPPLER_ACTION_JAVASCRIPT	/* Javascript action */
+	POPPLER_ACTION_JAVASCRIPT,	/* Javascript action */
+	POPPLER_ACTION_RESETFORM    /* Javascript action */ //TODO do we need to add this to glib/poppler-enums.c ?
+
 } PopplerActionType;
 
 /**
@@ -148,6 +150,7 @@ typedef struct _PopplerActionMovie      PopplerActionMovie;
 typedef struct _PopplerActionRendition  PopplerActionRendition;
 typedef struct _PopplerActionOCGState   PopplerActionOCGState;
 typedef struct _PopplerActionJavascript PopplerActionJavascript;
+typedef struct _PopplerActionResetForm 	PopplerActionResetForm;
 
 /**
  * PopplerDest:
@@ -276,6 +279,14 @@ struct _PopplerActionJavascript
 	gchar		  *script;
 };
 
+struct _PopplerActionResetForm
+{
+	PopplerActionType type;
+	gchar			 *title;
+
+	GList			 *field_list;	//glib frontend would create the final list of all fields to be reset..
+};
+
 /**
  * PopplerAction:
  *
@@ -294,6 +305,7 @@ union _PopplerAction
 	PopplerActionRendition rendition;
 	PopplerActionOCGState ocg_state;
 	PopplerActionJavascript javascript;
+	PopplerActionResetForm reset_form;
 };
 
 #define POPPLER_TYPE_ACTION             (poppler_action_get_type ())
