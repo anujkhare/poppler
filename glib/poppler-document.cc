@@ -2661,6 +2661,110 @@ poppler_ps_file_free (PopplerPSFile *ps_file)
 }
 
 /**
+ * poppler_document_get_form_fields:
+ * @document: A #PopplerDocument
+ *
+ * Returns a #GList containing #PopplerAttachment<!-- -->s.  These attachments
+ * are unowned, and must be unreffed, and the list must be freed with
+ * g_list_free().
+ *
+ * Return value: (element-type PopplerAttachment) (transfer full): a list of available attachments.
+ **/
+GList *
+poppler_document_get_form_fields (PopplerDocument *document)
+{
+	Catalog	*catalog;
+	Form		*form;
+	GList		*retval = NULL;
+	gint 		 i;
+
+	g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), NULL);
+
+	catalog = document->doc->getCatalog();
+	if (!catalog || !catalog->isOk())
+	      return NULL;
+
+	if (catalog->getFormType() != AcroForm)
+	      return NULL;
+
+	form = catalog->getForm();
+	if (!form)
+	      return NULL;
+
+	printf ("POPPLER - get_form_fields numfields - %d\n", form->getNumFields());
+
+	for (i = 0; i < form->getNumFields(); i++) {
+		FormField *field = getRootField (i);
+		printf ("%d", field->getNumWidgets());
+		//get widgets, and put them in the list.?
+	}
+	return g_list_reverse (retval);
+}
+
+/**
+ * poppler_document_reset_form:
+ * @document: a #PopplerDocument
+ * @field_list: List of fields to be reset
+ * @??: Include/Exclude flag
+ *
+ * Resets the field widgets specified by @field_list if ?? is ??, and all other fields if ?? is ??
+ * If @field_list is %NULL, resets all the form fields in the document.
+ * 
+ **/
+/*void
+poppler_document_reset_form (PopplerDocument	*document,
+			     GList		*field_list)
+{
+	//FIXME maybe it will be better to let evince do this.. otherwise will uncessarily pass on the field/flag list around..
+	 //An alternative would be to have reset action pass Only the Final field list to be reset, and just call reset on all of them from evince
+	 //But while construction, actions don't know which document/page they belong to, so how would we get a list of all the fields.? 
+
+	//do something like construct_reset_field_list to get final list..
+	gint	 i;
+	GList 	*l;
+	GList 	*reset_field_list = NULL;
+
+	if (!fields_list) {
+		// reset all fields
+		for (i = 0; i < poppler_document_get_n_pages (document); ++i) {
+			PopplerPage *page = poppler_document_get_page (document, i);
+
+			FormPageWidgets *forms;
+			forms = page->page->getFormWidgets ();
+			
+			for (i = 0; i < forms->getNumWidgets (); i++) {
+				FormWidget *widget;
+
+				widget = forms->getWidget (i);
+
+				widget->reset();
+			}
+			delete forms;
+		}
+
+	} else if (?? == ?) {
+		// reset the fields given in the list
+		reset_field_list = fields_list;
+
+	} else {
+		//reset all the fields except these.
+	}
+
+	for (l = reset_field_list; l ; l = l->next) {
+		FormWidget *widget;
+
+		widget = l->data;
+
+		widget->reset();
+	}
+
+	g_list_free (
+
+
+
+}
+*/
+/**
  * poppler_document_get_form_field:
  * @document: a #PopplerDocument
  * @id: an id of a #PopplerFormField

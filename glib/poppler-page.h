@@ -88,6 +88,7 @@ GList                 *poppler_page_get_image_mapping    (PopplerPage        *pa
 void                   poppler_page_free_image_mapping   (GList              *list);
 cairo_surface_t       *poppler_page_get_image            (PopplerPage        *page,
 							  gint                image_id);
+void		       poppler_page_reset_form_fields 	 (PopplerPage *page);
 GList              *poppler_page_get_form_field_mapping  (PopplerPage        *page);
 void                poppler_page_free_form_field_mapping (GList              *list);
 GList                 *poppler_page_get_annot_mapping    (PopplerPage        *page);

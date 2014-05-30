@@ -226,6 +226,7 @@ PopplerDest       *poppler_document_find_dest              (PopplerDocument  *do
 /* Form */
 PopplerFormField  *poppler_document_get_form_field         (PopplerDocument  *document,
 							    gint              id);
+GList		  *poppler_document_get_form_fields	   (PopplerDocument *document);
 
 /* Interface for getting the Index of a poppler_document */
 #define POPPLER_TYPE_INDEX_ITER                 (poppler_index_iter_get_type ())

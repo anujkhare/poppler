@@ -1275,6 +1275,30 @@ poppler_page_free_link_mapping (GList *list)
   g_list_free (list);
 }
 
+void
+poppler_page_reset_form_fields (PopplerPage *page)
+{
+	printf ("POPPLER - page_reset_form_fields\n");
+
+	FormPageWidgets *forms;
+	gint i;
+
+	forms = page->page->getFormWidgets ();
+
+	if (forms == NULL)
+		return;
+
+	for (i = 0; i < forms->getNumWidgets (); i++) {
+		FormWidget *widget;
+
+		widget = forms->getWidget (i);
+
+		widget->resetField();
+	}
+
+	delete forms;
+}
+
 /**
  * poppler_page_get_form_field_mapping:
  * @page: A #PopplerPage
