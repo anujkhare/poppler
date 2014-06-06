@@ -688,6 +688,36 @@ FormWidget* FormField::findWidgetByRef (Ref aref)
   return NULL;
 }
 
+FormField* FormField::findFieldByRef (Ref aref)
+{
+  if (aref.num == ref.num && aref.gen == ref.gen) {
+    return this;
+  } else if (!terminal) {
+    for(int i = 0; i < numChildren; i++) {
+      FormField* result = children[i]->findFieldByRef(aref);
+      if (result) {
+        return result;
+      }
+    }
+  }
+  return NULL;
+}
+
+FormField *FormField::findFieldByFullyQualifiedName(GooString *fullyQualifiedName)
+{
+  if (getFullyQualifiedName()->cmp(fullyQualifiedName) == 0) {
+    return this;
+  } else if (!terminal) {
+    for(int i = 0; i < numChildren; i++) {
+      FormField* result = children[i]->findFieldByFullyQualifiedName(fullyQualifiedName);
+      if (result) {
+        return result;
+      }
+    }
+  }
+  return NULL;
+}
+
 GooString* FormField::getFullyQualifiedName() {
   Object obj1, obj2;
   Object parent;
@@ -1560,6 +1590,24 @@ FormWidget* Form::findWidgetByRef (Ref aref)
   for(int i=0; i<numFields; i++) {
     FormWidget *result = rootFields[i]->findWidgetByRef(aref);
     if(result) return result;
+  }
+  return NULL;
+}
+
+FormField *Form::findFieldByRef(Ref aref)
+{
+  for(int i = 0; i < numFields; i++) {
+    FormField *result = rootFields[i]->findFieldByRef(aref);
+    if (result) return result;
+  }
+  return NULL;
+}
+
+FormField *Form::findFieldByFullyQualifiedName(GooString *fullyQualifiedName)
+{
+  for(int i = 0; i < numFields; i++) {
+    FormField *result = rootFields[i]->findFieldByFullyQualifiedName(fullyQualifiedName);
+    if (result) return result;
   }
   return NULL;
 }

@@ -280,8 +280,13 @@ public:
   GooString *getFullyQualifiedName();
 
   FormWidget* findWidgetByRef (Ref aref);
+  FormField *findFieldByRef(Ref aref);
+  FormField *findFieldByFullyQualifiedName(GooString *fullyQualifiedName);
+
   int getNumWidgets() { return terminal ? numChildren : 0; }
   FormWidget *getWidget(int i) { return terminal ? widgets[i] : NULL; }
+  int getNumChildren() { return numChildren; }
+  FormField *getChild(int i) { return terminal ? NULL : children[i]; }
 
   // only implemented in FormFieldButton
   virtual void fillChildrenSiblingsID ();
@@ -523,6 +528,8 @@ public:
   Object* getDefaultResourcesObj() { return &resDict; }
 
   FormWidget* findWidgetByRef (Ref aref);
+  FormField *findFieldByRef(Ref aref);
+  FormField *findFieldByFullyQualifiedName(GooString *fullyQualifiedName);
 
   void postWidgetsLoad();
 private:

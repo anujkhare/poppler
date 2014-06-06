@@ -1100,7 +1100,7 @@ LinkAction* Catalog::getAdditionalAction(DocumentAdditionalActionsType type) {
     Object actionObject;
 
     if (additionalActionsObject.dictLookup(key, &actionObject)->isDict())
-      linkAction = LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
+      linkAction = LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI(), doc->getCatalog()->getForm());
     actionObject.free();
   }
 

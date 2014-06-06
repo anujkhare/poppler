@@ -97,7 +97,7 @@ OutlineItem::OutlineItem(Dict *dict, XRef *xrefA) {
   } else {
       obj1.free();
     if (!dict->lookup("A", &obj1)->isNull()) {
-        action = LinkAction::parseAction(&obj1);
+        action = LinkAction::parseAction(&obj1, NULL, NULL);
   }
   }
   obj1.free();

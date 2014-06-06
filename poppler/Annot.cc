@@ -227,7 +227,7 @@ static LinkAction* getAdditionalAction(Annot::AdditionalActionsType type, Object
     Object actionObject;
 
     if (additionalActionsObject.dictLookup(key, &actionObject)->isDict())
-      linkAction = LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
+      linkAction = LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI(), doc->getCatalog()->getForm());
     actionObject.free();
   }
 
@@ -249,7 +249,7 @@ static LinkAction* getFormAdditionalAction(Annot::FormAdditionalActionsType type
     Object actionObject;
 
     if (additionalActionsObject.dictLookup(key, &actionObject)->isDict())
-      linkAction = LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
+      linkAction = LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI(), doc->getCatalog()->getForm());
     actionObject.free();
   }
 
@@ -2619,7 +2619,7 @@ void AnnotLink::initialize(PDFDoc *docA, Dict *dict) {
   } else {
     obj1.free();
     if (dict->lookup("A", &obj1)->isDict()) {
-      action = LinkAction::parseAction(&obj1, doc->getCatalog()->getBaseURI());
+      action = LinkAction::parseAction(&obj1, doc->getCatalog()->getBaseURI(), doc->getCatalog()->getForm());
     }
   }
   obj1.free();
@@ -3952,7 +3952,7 @@ void AnnotWidget::initialize(PDFDoc *docA, Dict *dict) {
 
   action = NULL;
   if(dict->lookup("A", &obj1)->isDict()) {
-    action = LinkAction::parseAction(&obj1, doc->getCatalog()->getBaseURI());
+    action = LinkAction::parseAction(&obj1, doc->getCatalog()->getBaseURI(), doc->getCatalog()->getForm());
   }
   obj1.free();
 
@@ -5362,7 +5362,7 @@ void AnnotScreen::initialize(PDFDoc *docA, Dict* dict) {
 
   action = NULL;
   if (dict->lookup("A", &obj1)->isDict()) {
-    action = LinkAction::parseAction(&obj1, doc->getCatalog()->getBaseURI());
+    action = LinkAction::parseAction(&obj1, doc->getCatalog()->getBaseURI(), doc->getCatalog()->getForm());
     if (action->getKind() == actionRendition && page == 0) {
       error (errSyntaxError, -1, "Invalid Rendition action: associated screen annotation without P");
       delete action;

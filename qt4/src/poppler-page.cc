@@ -608,7 +608,7 @@ Link *Page::action( PageAction act ) const
     Object o2;
     const char *key = act == Page::Opening ? "O" : "C";
     dict->lookup((char*)key, &o2);
-    ::LinkAction *lact = ::LinkAction::parseAction(&o2, m_page->parentDoc->doc->getCatalog()->getBaseURI() );
+    ::LinkAction *lact = ::LinkAction::parseAction(&o2, m_page->parentDoc->doc->getCatalog()->getBaseURI(), m_page->parentDoc->doc->getCatalog()->getForm() );
     o2.free();
     o.free();
     Link *popplerLink = NULL;

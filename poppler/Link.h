@@ -40,6 +40,8 @@ class Sound;
 class MediaRendition;
 class AnnotLink;
 class Annots;
+class Form;
+class FormField;
 
 //------------------------------------------------------------------------
 // LinkAction
@@ -56,6 +58,7 @@ enum LinkActionKind {
   actionSound,			// sound action
   actionJavaScript,		// JavaScript action
   actionOCGState,               // Set-OCG-State action
+  actionResetForm,              // Reset form action
   actionUnknown			// anything else
 };
 
@@ -75,7 +78,7 @@ public:
   static LinkAction *parseDest(Object *obj);
 
   // Parse an action dictionary.
-  static LinkAction *parseAction(Object *obj, GooString *baseURI = NULL);
+  static LinkAction *parseAction(Object *obj, GooString *baseURI, Form *forms);
 };
 
 //------------------------------------------------------------------------
@@ -441,6 +444,36 @@ public:
 private:
   GooList *stateList;
   GBool preserveRB;
+};
+
+//------------------------------------------------------------------------
+// LinkResetForm
+//------------------------------------------------------------------------
+
+class LinkResetForm: public LinkAction {
+public:
+
+  // Build a LinkResetForm with the specified action type.
+  LinkResetForm(Object *obj, Form *form);
+
+  // Destructor.
+  virtual ~LinkResetForm();
+
+  // Was the LinkResetForm create successfully?
+  virtual GBool isOk() { return true; }
+
+  // Accessors.
+  virtual LinkActionKind getKind() { return actionResetForm; }
+
+  FormField *getField(int i) { return fieldList[i]; }
+  int getNumFields() { return numFields; }
+  int getFlags() { return flags; }
+
+private:
+
+  FormField **fieldList;
+  int numFields;
+  int flags;
 };
 
 //------------------------------------------------------------------------

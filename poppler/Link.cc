@@ -46,6 +46,7 @@
 #include "FileSpec.h"
 #include "Rendition.h"
 #include "Annot.h"
+#include "Form.h"
 
 //------------------------------------------------------------------------
 // LinkAction
@@ -62,7 +63,7 @@ LinkAction *LinkAction::parseDest(Object *obj) {
   return action;
 }
 
-LinkAction *LinkAction::parseAction(Object *obj, GooString *baseURI) {
+LinkAction *LinkAction::parseAction(Object *obj, GooString *baseURI, Form *forms) {
   LinkAction *action;
   Object obj2, obj3, obj4;
 
@@ -125,6 +126,10 @@ LinkAction *LinkAction::parseAction(Object *obj, GooString *baseURI) {
   // Set-OCG-State action
   } else if (obj2.isName("SetOCGState")) {
     action = new LinkOCGState(obj);
+
+  // ResetForm action
+  } else if (obj2.isName("ResetForm")) {
+    action = new LinkResetForm(obj, forms);
 
   // unknown action
   } else if (obj2.isName()) {
@@ -876,6 +881,47 @@ LinkOCGState::~LinkOCGState() {
 LinkOCGState::StateList::~StateList() {
   if (list)
     deleteGooList(list, Ref);
+}
+
+//------------------------------------------------------------------------
+// LinkResetForm
+//------------------------------------------------------------------------
+
+LinkResetForm::LinkResetForm(Object *obj, Form *forms) {
+  Object obj1;
+
+  fieldList = NULL;
+  numFields = 0;
+  flags = 0;
+
+  if (obj->dictLookup("Fields", &obj1)->isArray()) {
+    numFields = obj1.arrayGetLength();
+    fieldList = (FormField**)greallocn(fieldList, numFields, sizeof(FormField*));
+    for (int i = 0; i < numFields; ++i) {
+      Object obj2;
+
+      obj1.arrayGetNF(i, &obj2);
+      if (obj2.isString()) {
+        fieldList[i] = forms->findFieldByFullyQualifiedName(obj2.getString());
+      } else if (obj2.isRef()) {
+        fieldList[i] = forms->findFieldByRef(obj2.getRef());
+      } else {
+        error(errSyntaxError, -1, "Found a ResetForm Fields item that is not a String or a Ref");
+        fieldList[i] = NULL;
+      }
+      obj2.free();
+    }
+    obj1.free();
+
+    if (obj->dictLookup("Flags", &obj1)->isInt()) {
+      flags = obj1.getInt();
+    }
+  }
+  obj1.free();
+}
+
+LinkResetForm::~LinkResetForm() {
+  gfree(fieldList);
 }
 
 //------------------------------------------------------------------------
