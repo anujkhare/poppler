@@ -718,6 +718,27 @@ FormField *FormField::findFieldByFullyQualifiedName(GooString *fullyQualifiedNam
   return NULL;
 }
 
+FormField **FormField::getAllChildren(int &childCount)
+{
+  childCount = 0;
+  FormField **retval = NULL;
+  if (!terminal) {
+    for (int i = 0; i < numChildren; ++i) {
+      int count = 0;
+      FormField **tmp = children[i]->getAllChildren(count);
+
+      retval = (FormField**)greallocn(retval, childCount+count+1, sizeof(FormField*));
+      retval[childCount++] = children[i];
+      for (int j = 0; j < count; ++j) {
+        retval[childCount+j] = tmp[j];
+      }
+      gfree(tmp);
+      childCount += count;
+    }
+  }
+  return retval;
+}
+
 GooString* FormField::getFullyQualifiedName() {
   Object obj1, obj2;
   Object parent;
@@ -1610,6 +1631,26 @@ FormField *Form::findFieldByFullyQualifiedName(GooString *fullyQualifiedName)
     if (result) return result;
   }
   return NULL;
+}
+
+FormField **Form::getFieldsList(int &fieldCount)
+{
+  FormField **retval = NULL;
+  fieldCount = 0;
+
+  for (int i = 0; i < numFields; ++i) {
+    int numChildren = 0;
+    FormField **children = rootFields[i]->getAllChildren(numChildren);
+
+    retval = (FormField**)greallocn(retval, fieldCount+numChildren+1, sizeof(FormField*));
+    retval[fieldCount++] = rootFields[i];
+    for (int j = 0; j < numChildren; ++j) {
+      retval[fieldCount+j] = children[j];
+    }
+    fieldCount += numChildren;
+  }
+
+  return retval;
 }
 
 //------------------------------------------------------------------------

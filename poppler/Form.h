@@ -287,6 +287,7 @@ public:
   FormWidget *getWidget(int i) { return terminal ? widgets[i] : NULL; }
   int getNumChildren() { return numChildren; }
   FormField *getChild(int i) { return terminal ? NULL : children[i]; }
+  FormField **getAllChildren(int &count);
 
   // only implemented in FormFieldButton
   virtual void fillChildrenSiblingsID ();
@@ -527,6 +528,7 @@ public:
   GfxResources* getDefaultResources() const { return defaultResources; }
   Object* getDefaultResourcesObj() { return &resDict; }
 
+  FormField **getFieldsList (int &fieldCount);
   FormWidget* findWidgetByRef (Ref aref);
   FormField *findFieldByRef(Ref aref);
   FormField *findFieldByFullyQualifiedName(GooString *fullyQualifiedName);
