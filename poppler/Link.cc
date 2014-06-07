@@ -887,8 +887,9 @@ LinkOCGState::StateList::~StateList() {
 // LinkResetForm
 //------------------------------------------------------------------------
 
-LinkResetForm::LinkResetForm(Object *obj, Form *forms) {
+LinkResetForm::LinkResetForm(Object *obj, Form *form) {
   Object obj1;
+  FormField **fields = NULL;
 
   fieldList = NULL;
   numFields = 0;
@@ -896,18 +897,18 @@ LinkResetForm::LinkResetForm(Object *obj, Form *forms) {
 
   if (obj->dictLookup("Fields", &obj1)->isArray()) {
     numFields = obj1.arrayGetLength();
-    fieldList = (FormField**)greallocn(fieldList, numFields, sizeof(FormField*));
+    fields = (FormField**)greallocn(fields, numFields, sizeof(FormField*));
     for (int i = 0; i < numFields; ++i) {
       Object obj2;
 
       obj1.arrayGetNF(i, &obj2);
       if (obj2.isString()) {
-        fieldList[i] = forms->findFieldByFullyQualifiedName(obj2.getString());
+        fields[i] = form->findFieldByFullyQualifiedName(obj2.getString());
       } else if (obj2.isRef()) {
-        fieldList[i] = forms->findFieldByRef(obj2.getRef());
+        fields[i] = form->findFieldByRef(obj2.getRef());
       } else {
         error(errSyntaxError, -1, "Found a ResetForm Fields item that is not a String or a Ref");
-        fieldList[i] = NULL;
+        fields[i] = NULL;
       }
       obj2.free();
     }
@@ -918,6 +919,32 @@ LinkResetForm::LinkResetForm(Object *obj, Form *forms) {
     }
   }
   obj1.free();
+
+  if (numFields == 0) {     // reset all the fields
+    fieldList = form->getFieldsList(numFields);
+
+  } else if (flags & 1) {   // exclude these fields
+    int numFormFields = 0;
+    FormField **formFields = form->getFieldsList(numFormFields);
+    int i,j,k = 0;
+
+    fieldList = (FormField **)greallocn(fieldList, numFormFields - numFields, sizeof(FormField *));
+    for (i = 0; i < numFormFields; ++i) {
+      for (j = 0; j < numFields; ++j) {
+        if (formFields[i] == fields[j])
+          break;
+      }
+      if (j == numFields) {
+        fieldList[k++] = formFields[i];
+      }
+    }
+    numFields = numFormFields - numFields;
+    gfree(fields);
+    gfree(formFields);
+
+  } else {                // reset just these fields
+    fieldList = fields;
+  }
 }
 
 LinkResetForm::~LinkResetForm() {
