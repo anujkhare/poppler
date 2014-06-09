@@ -144,6 +144,10 @@ poppler_action_free (PopplerAction *action)
 		if (action->javascript.script)
 			g_free (action->javascript.script);
 		break;
+	case POPPLER_ACTION_RESETFORM:
+		if (action->reset_form.link)
+			g_free (action->reset_form.link);
+		break;
 	default:
 		break;
 	}
@@ -221,6 +225,10 @@ poppler_action_copy (PopplerAction *action)
 	case POPPLER_ACTION_JAVASCRIPT:
 		if (action->javascript.script)
 			new_action->javascript.script = g_strdup (action->javascript.script);
+		break;
+	case POPPLER_ACTION_RESETFORM:
+                new_action->reset_form.link = (PopplerLinkResetForm*)g_malloc (sizeof (PopplerLinkResetForm));
+                new_action->reset_form.link->link = action->reset_form.link->link;
 		break;
 	default:
 		break;
@@ -534,6 +542,14 @@ build_javascript (PopplerAction *action,
 }
 
 static void
+build_reset_form (PopplerAction *action,
+		  LinkResetForm *link)
+{
+        action->reset_form.link = (PopplerLinkResetForm*)g_malloc (sizeof (PopplerLinkResetForm));
+        action->reset_form.link->link = link;
+}
+
+static void
 build_rendition (PopplerAction *action,
 		 LinkRendition *link)
 {
@@ -673,6 +689,10 @@ _poppler_action_new (PopplerDocument *document,
 	case actionJavaScript:
 		action->type = POPPLER_ACTION_JAVASCRIPT;
 		build_javascript (action, dynamic_cast<LinkJavaScript*> (link));
+		break;
+	case actionResetForm:
+		action->type = POPPLER_ACTION_RESETFORM;
+		build_reset_form (action, dynamic_cast<LinkResetForm*> (link));
 		break;
 	case actionUnknown:
 	default:
