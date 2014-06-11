@@ -2698,6 +2698,19 @@ poppler_document_get_form_field (PopplerDocument *document,
   return NULL;
 }
 
+void
+poppler_forms_reset_form (PopplerAction      *action)
+{
+  g_return_if_fail (action->type == POPPLER_ACTION_RESETFORM);
+
+  LinkResetForm *link = (LinkResetForm *)action->reset_form.link->link;
+  gint i;
+
+  for (i = 0; i < link->getNumFields(); ++i) {
+        link->getField(i)->reset();
+  }
+}
+
 gboolean
 _poppler_convert_pdf_date_to_gtime (GooString *date,
 				    time_t    *gdate) 
