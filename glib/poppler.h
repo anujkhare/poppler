@@ -190,6 +190,7 @@ typedef struct _PopplerFontInfo            PopplerFontInfo;
 typedef struct _PopplerLayer               PopplerLayer;
 typedef struct _PopplerPSFile              PopplerPSFile;
 typedef union  _PopplerAction              PopplerAction;
+typedef struct _PopplerLinkResetForm       PopplerLinkResetForm;
 typedef struct _PopplerDest                PopplerDest;
 typedef struct _PopplerActionLayer         PopplerActionLayer;
 typedef struct _PopplerFormField           PopplerFormField;

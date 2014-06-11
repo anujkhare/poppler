@@ -73,6 +73,11 @@ struct _PopplerFormField
   PopplerAction *action;
 };
 
+struct _PopplerLinkResetForm
+{
+  LinkResetForm *link;
+};
+
 struct _PopplerAnnot
 {
   GObject  parent_instance;
