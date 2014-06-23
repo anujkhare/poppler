@@ -247,6 +247,13 @@ void                          poppler_annot_free_text_set_quadding             (
                                                                                 PopplerAnnotFreeTextQuadding quadding);
 PopplerAnnotCalloutLine      *poppler_annot_free_text_get_callout_line         (PopplerAnnotFreeText *poppler_annot);
 PopplerAnnot                 *poppler_annot_free_text_new                      (PopplerDocument      *doc,
+                                                                                PopplerRectangle     *rect);
+gchar                        *poppler_annot_free_text_get_font_name            (PopplerAnnotFreeText *poppler_annot);
+void                          poppler_annot_free_text_set_font_name            (PopplerAnnotFreeText *poppler_annot,
+                                                                                gchar                *font_name);
+gdouble                       poppler_annot_free_text_get_font_size            (PopplerAnnotFreeText *poppler_annot);
+void                          poppler_annot_free_text_set_font_size            (PopplerAnnotFreeText *poppler_annot,
+                                                                                gdouble               font_size);
 
 /* PopplerAnnotFileAttachment */
 GType                         poppler_annot_file_attachment_get_type           (void) G_GNUC_CONST;

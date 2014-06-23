@@ -1751,6 +1751,79 @@ poppler_annot_free_text_get_callout_line (PopplerAnnotFreeText *poppler_annot)
   return NULL;
 }
 
+static void
+poppler_annot_free_text_set_font (PopplerAnnotFreeText *poppler_annot,
+                                  gchar                *font_name,
+                                  gint                  font_size)
+{
+  AnnotFreeText *annot;
+  GooString     *da;
+
+  annot = static_cast<AnnotFreeText *>(POPPLER_ANNOT (poppler_annot)->annot);
+  da = create_appearance_string (font_name, font_size);
+  annot->setAppearanceString (da);
+  delete da;
+}
+
+gdouble
+poppler_annot_free_text_get_font_size (PopplerAnnotFreeText *poppler_annot)
+{
+  AnnotFreeText *annot;
+  GooString *da;
+  GRegex *regex;
+  GMatchInfo *match_info;
+
+  g_return_val_if_fail (POPPLER_IS_ANNOT_FREE_TEXT (poppler_annot), 0);
+
+  annot = static_cast<AnnotFreeText *>(POPPLER_ANNOT (poppler_annot)->annot);
+  da = annot->getAppearanceString();
+
+  if (!da || da->getLength() == 0)
+    return 0;
+
+  regex = g_regex_new ("(\\d+)(\\.\\d*)? Tf", (GRegexCompileFlags) 0,
+                       (GRegexMatchFlags) 0, NULL);
+
+  g_regex_match (regex, da->getCString(), (GRegexMatchFlags) 0, &match_info);  //look for font size
+  gchar *match = g_match_info_fetch (match_info, 0);
+  gdouble size = g_strtod (match, NULL);
+
+  g_free (match);
+  g_match_info_free (match_info);
+  g_regex_unref (regex);
+  return size;
+}
+
+void
+poppler_annot_free_text_set_font_size (PopplerAnnotFreeText *poppler_annot,
+                                       gdouble               font_size)
+{
+  g_return_if_fail (POPPLER_IS_ANNOT_FREE_TEXT (poppler_annot));
+
+  poppler_annot_free_text_set_font (poppler_annot,
+                                    poppler_annot_free_text_get_font_name (poppler_annot),
+                                    font_size);
+}
+
+gchar *
+poppler_annot_free_text_get_font_name (PopplerAnnotFreeText *poppler_annot)
+{
+  g_return_val_if_fail (POPPLER_IS_ANNOT_FREE_TEXT (poppler_annot), NULL);
+
+  //TODO
+  return NULL;
+}
+
+void
+poppler_annot_free_text_set_font_name (PopplerAnnotFreeText *poppler_annot,
+                                       gchar                *font_name)
+{
+  g_return_if_fail (POPPLER_IS_ANNOT_FREE_TEXT (poppler_annot));
+
+  poppler_annot_free_text_set_font (poppler_annot, font_name,
+                                    poppler_annot_free_text_get_font_size (poppler_annot));
+}
+
 /* PopplerAnnotFileAttachment */
 /**
  * poppler_annot_file_attachment_get_attachment:
