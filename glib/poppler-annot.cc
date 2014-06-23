@@ -1751,6 +1751,32 @@ poppler_annot_free_text_get_callout_line (PopplerAnnotFreeText *poppler_annot)
   return NULL;
 }
 
+void
+poppler_annot_free_text_set_callout_line (PopplerAnnotFreeText    *poppler_annot,
+                                          PopplerAnnotCalloutLine *callout)
+{
+  AnnotFreeText *annot;
+  AnnotCalloutLine *line = NULL;
+
+  g_return_if_fail (POPPLER_IS_ANNOT_FREE_TEXT (poppler_annot));
+
+  if (callout != NULL) {
+    if (callout->multiline) {
+      line = new AnnotCalloutMultiLine (callout->x1, callout->y1,
+                                        callout->x2, callout->y2,
+                                        callout->x3, callout->y3);
+    } else {
+      line = new AnnotCalloutLine (callout->x1, callout->y1,
+                                   callout->x2, callout->y2);
+    }
+  }
+
+  annot = static_cast<AnnotFreeText *>(POPPLER_ANNOT (poppler_annot)->annot);
+  annot->setCalloutLine (line);
+  if (!line)
+    delete line;
+}
+
 static void
 poppler_annot_free_text_set_font (PopplerAnnotFreeText *poppler_annot,
                                   gchar                *font_name,

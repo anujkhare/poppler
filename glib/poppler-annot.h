@@ -246,6 +246,8 @@ PopplerAnnotFreeTextQuadding  poppler_annot_free_text_get_quadding             (
 void                          poppler_annot_free_text_set_quadding             (PopplerAnnotFreeText *poppler_annot,
                                                                                 PopplerAnnotFreeTextQuadding quadding);
 PopplerAnnotCalloutLine      *poppler_annot_free_text_get_callout_line         (PopplerAnnotFreeText *poppler_annot);
+void                          poppler_annot_free_text_set_callout_line         (PopplerAnnotFreeText *poppler_annot,
+                                                                                PopplerAnnotCalloutLine *callout);
 PopplerAnnot                 *poppler_annot_free_text_new                      (PopplerDocument      *doc,
                                                                                 PopplerRectangle     *rect);
 gchar                        *poppler_annot_free_text_get_font_name            (PopplerAnnotFreeText *poppler_annot);
