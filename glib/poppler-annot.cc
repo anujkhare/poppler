@@ -1689,6 +1689,25 @@ poppler_annot_free_text_get_quadding (PopplerAnnotFreeText *poppler_annot)
 }
 
 /**
+ * poppler_annot_free_text_set_quadding:
+ * @poppler_annot: a #PopplerAnnotFreeText
+ * @quadding: a #PopplerAnnotFreeTextQuadding
+ *
+ * Sets the justification of the text of @poppler_annot.
+ **/ 
+void
+poppler_annot_free_text_set_quadding (PopplerAnnotFreeText         *poppler_annot,
+                                      PopplerAnnotFreeTextQuadding  quadding)
+{
+  AnnotFreeText *annot;
+
+  g_return_if_fail (POPPLER_IS_ANNOT_FREE_TEXT (poppler_annot));
+
+  annot = static_cast<AnnotFreeText *>(POPPLER_ANNOT (poppler_annot)->annot);
+  annot->setQuadding ((AnnotFreeText::AnnotFreeTextQuadding)quadding);
+}
+
+/**
  * poppler_annot_free_text_get_callout_line:
  * @poppler_annot: a #PopplerAnnotFreeText
  *

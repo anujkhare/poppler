@@ -243,6 +243,8 @@ GArray                       *poppler_annot_text_markup_get_quadrilaterals     (
 /* PopplerAnnotFreeText */
 GType                         poppler_annot_free_text_get_type                 (void) G_GNUC_CONST;
 PopplerAnnotFreeTextQuadding  poppler_annot_free_text_get_quadding             (PopplerAnnotFreeText *poppler_annot);
+void                          poppler_annot_free_text_set_quadding             (PopplerAnnotFreeText *poppler_annot,
+                                                                                PopplerAnnotFreeTextQuadding quadding);
 PopplerAnnotCalloutLine      *poppler_annot_free_text_get_callout_line         (PopplerAnnotFreeText *poppler_annot);
 PopplerAnnot                 *poppler_annot_free_text_new                      (PopplerDocument      *doc,
 
