@@ -470,10 +470,43 @@ poppler_annot_free_text_class_init (PopplerAnnotFreeTextClass *klass)
 {
 }
 
+static GooString *create_appearance_string (PopplerAnnotAppearance *appearance)
+{
+    if (!appearance)
+        return new GooString ("/Invalid_font 12 Tf");
+
+    GooString * s = GooString::format("/Invalid_font {0:f} Tf", appearance->font_size);
+    return s;
+}
+
 PopplerAnnot *
 _poppler_annot_free_text_new (Annot *annot)
 {
   return _poppler_create_annot (POPPLER_TYPE_ANNOT_FREE_TEXT, annot);
+}
+
+/**
+ * poppler_annot_free_text_new:
+ * TODO
+ * Creates a new free text annotation. Caller must call # to set appearance
+ */
+PopplerAnnot *
+poppler_annot_free_text_new (PopplerDocument  *doc,
+                             PopplerRectangle *rect)
+{
+  PopplerAnnot   *poppler_annot;
+  AnnotFreeText  *annot;
+  GooString      *goo_tmp;
+
+  PDFRectangle pdf_rect (rect->x1, rect->y1,
+		         rect->x2, rect->y2);
+
+  goo_tmp = create_appearance_string (NULL);
+  annot = new AnnotFreeText (doc->doc, &pdf_rect, goo_tmp);
+  delete goo_tmp;
+
+  poppler_annot = _poppler_annot_free_text_new (annot);
+  return poppler_annot;
 }
 
 static void
@@ -1659,6 +1692,49 @@ poppler_annot_free_text_get_quadding (PopplerAnnotFreeText *poppler_annot)
 }
 
 /**
+ * poppler_annot_free_text_set_quadding:
+ * @poppler_annot: a #PopplerAnnotFreeText
+ * @quadding: a #PopplerAnnotFreeTextQuadding
+ *
+ * Sets the justification of the text of @poppler_annot.
+ * Since: TODO
+ **/ 
+void
+poppler_annot_free_text_set_quadding (PopplerAnnotFreeText         *poppler_annot,
+                                      PopplerAnnotFreeTextQuadding  quadding)
+{
+  AnnotFreeText *annot;
+
+  g_return_if_fail (POPPLER_IS_ANNOT_FREE_TEXT (poppler_annot));
+
+  annot = static_cast<AnnotFreeText *>(POPPLER_ANNOT (poppler_annot)->annot);
+  annot->setQuadding ((AnnotFreeText::AnnotFreeTextQuadding) quadding);
+}
+
+PopplerAnnotFreeTextIntent
+poppler_annot_free_text_get_intent (PopplerAnnotFreeText *poppler_annot)
+{
+  AnnotFreeText *annot;
+
+  g_return_val_if_fail (POPPLER_IS_ANNOT_FREE_TEXT (poppler_annot), POPPLER_ANNOT_FREE_TEXT_INTENT_FREE_TEXT);
+
+  annot = static_cast<AnnotFreeText *>(POPPLER_ANNOT (poppler_annot)->annot);
+  return (PopplerAnnotFreeTextIntent) annot->getIntent ();
+}
+
+void
+poppler_annot_free_text_set_intent (PopplerAnnotFreeText      *poppler_annot,
+                                    PopplerAnnotFreeTextIntent intent)
+{
+  AnnotFreeText *annot;
+
+  g_return_if_fail (POPPLER_IS_ANNOT_FREE_TEXT (poppler_annot));
+
+  annot = static_cast<AnnotFreeText *>(POPPLER_ANNOT (poppler_annot)->annot);
+  annot->setIntent ((AnnotFreeText::AnnotFreeTextIntent) intent);
+}
+
+/**
  * poppler_annot_free_text_get_callout_line:
  * @poppler_annot: a #PopplerAnnotFreeText
  *
@@ -1700,6 +1776,77 @@ poppler_annot_free_text_get_callout_line (PopplerAnnotFreeText *poppler_annot)
   }
 
   return NULL;
+}
+
+void
+poppler_annot_free_text_set_callout_line (PopplerAnnotFreeText    *poppler_annot,
+                                          PopplerAnnotCalloutLine *callout)
+{
+  AnnotFreeText *annot;
+  AnnotCalloutLine *line = NULL;
+
+  g_return_if_fail (POPPLER_IS_ANNOT_FREE_TEXT (poppler_annot));
+
+  if (callout != NULL) {
+    if (callout->multiline) {
+      line = new AnnotCalloutMultiLine (callout->x1, callout->y1,
+                                        callout->x2, callout->y2,
+                                        callout->x3, callout->y3);
+    } else {
+      line = new AnnotCalloutLine (callout->x1, callout->y1,
+                                   callout->x2, callout->y2);
+    }
+  }
+
+  annot = static_cast<AnnotFreeText *>(POPPLER_ANNOT (poppler_annot)->annot);
+  annot->setCalloutLine (line);
+  if (!line)
+    delete line;
+}
+
+PopplerAnnotAppearance *
+poppler_annot_free_text_get_annot_appearance (PopplerAnnotFreeText *poppler_annot)
+{
+  //TODO Expose method from core to parse the DA
+  AnnotFreeText *annot;
+  PopplerAnnotAppearance *appearance;
+  GooString *da;
+  GRegex *regex;
+  GMatchInfo *match_info;
+
+  g_return_val_if_fail (POPPLER_IS_ANNOT_FREE_TEXT (poppler_annot), NULL);
+
+  appearance = poppler_annot_appearance_new ();
+  annot = static_cast<AnnotFreeText *>(POPPLER_ANNOT (poppler_annot)->annot);
+  da = annot->getAppearanceString();
+
+  if (!da || da->getLength() == 0)
+    g_warning ("The free text annotation has no DA");
+
+  regex = g_regex_new ("(\\d+)(\\.\\d*)? Tf", (GRegexCompileFlags) 0,
+                       (GRegexMatchFlags) 0, NULL);
+
+  g_regex_match (regex, da->getCString(), (GRegexMatchFlags) 0, &match_info);  //look for font size
+  gchar *match = g_match_info_fetch (match_info, 0);
+  appearance->font_size = g_strtod (match, NULL);
+
+  g_free (match);
+  g_match_info_free (match_info);
+  g_regex_unref (regex);
+  return appearance;
+}
+
+void
+poppler_annot_free_text_set_annot_appearance (PopplerAnnotFreeText   *poppler_annot,
+                                              PopplerAnnotAppearance *appearance)
+{
+  AnnotFreeText *annot;
+  GooString     *da;
+
+  annot = static_cast<AnnotFreeText *>(POPPLER_ANNOT (poppler_annot)->annot);
+  da = create_appearance_string (appearance);
+  annot->setAppearanceString (da);
+  delete da;
 }
 
 /* PopplerAnnotFileAttachment */

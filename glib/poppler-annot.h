@@ -160,6 +160,13 @@ typedef enum
   POPPLER_ANNOT_FREE_TEXT_QUADDING_RIGHT_JUSTIFIED
 } PopplerAnnotFreeTextQuadding;
 
+typedef enum
+{
+  POPPLER_ANNOT_FREE_TEXT_INTENT_FREE_TEXT,
+  POPPLER_ANNOT_FREE_TEXT_INTENT_CALLOUT,
+  POPPLER_ANNOT_FREE_TEXT_INTENT_TYPE_WRITER
+} PopplerAnnotFreeTextIntent;
+
 struct _PopplerAnnotCalloutLine
 {
   gboolean multiline;
@@ -251,7 +258,20 @@ GArray                       *poppler_annot_text_markup_get_quadrilaterals     (
 /* PopplerAnnotFreeText */
 GType                         poppler_annot_free_text_get_type                 (void) G_GNUC_CONST;
 PopplerAnnotFreeTextQuadding  poppler_annot_free_text_get_quadding             (PopplerAnnotFreeText *poppler_annot);
+void                          poppler_annot_free_text_set_quadding             (PopplerAnnotFreeText *poppler_annot,
+                                                                                PopplerAnnotFreeTextQuadding quadding);
+
+PopplerAnnotFreeTextIntent    poppler_annot_free_text_get_intent               (PopplerAnnotFreeText *poppler_annot);
+void                          poppler_annot_free_text_set_intent               (PopplerAnnotFreeText *poppler_annot,
+                                                                                PopplerAnnotFreeTextIntent intent);
 PopplerAnnotCalloutLine      *poppler_annot_free_text_get_callout_line         (PopplerAnnotFreeText *poppler_annot);
+void                          poppler_annot_free_text_set_callout_line         (PopplerAnnotFreeText *poppler_annot,
+                                                                                PopplerAnnotCalloutLine *callout);
+PopplerAnnot                 *poppler_annot_free_text_new                      (PopplerDocument      *doc,
+                                                                                PopplerRectangle     *rect);
+PopplerAnnotAppearance       *poppler_annot_free_text_get_annot_appearance     (PopplerAnnotFreeText   *poppler_annot);
+void                          poppler_annot_free_text_set_annot_appearance     (PopplerAnnotFreeText   *poppler_annot,
+                                                                                PopplerAnnotAppearance *appearance);
 
 /* PopplerAnnotFileAttachment */
 GType                         poppler_annot_file_attachment_get_type           (void) G_GNUC_CONST;
