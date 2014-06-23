@@ -3015,6 +3015,8 @@ void AnnotFreeText::generateFreeTextAppearance()
     fontsize = 10;
   if (fontcolor == NULL)
     fontcolor = new AnnotColor(0, 0, 0); // Black
+  if (!contents)
+         contents = new GooString ("");
 
   // Draw box
   GBool doFill = (color && color->getSpace() != AnnotColor::colorTransparent);
