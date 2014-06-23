@@ -470,10 +470,40 @@ poppler_annot_free_text_class_init (PopplerAnnotFreeTextClass *klass)
 {
 }
 
+GooString *create_appearance_string (gchar   *font_name,
+                                     gdouble  font_size)
+{
+    GooString * s = GooString::format("/Invalid_font {0:f} Tf", font_size);
+    return s;
+}
+
 PopplerAnnot *
 _poppler_annot_free_text_new (Annot *annot)
 {
   return _poppler_create_annot (POPPLER_TYPE_ANNOT_FREE_TEXT, annot);
+}
+
+/**freetext
+ * poppler_annot_free_text_new:
+ */
+PopplerAnnot *
+poppler_annot_free_text_new (PopplerDocument  *doc,
+                             PopplerRectangle *rect)
+{
+  PopplerAnnot   *poppler_annot;
+  AnnotFreeText  *annot;
+  GooString      *goo_tmp;
+
+  PDFRectangle pdf_rect (rect->x1, rect->y1,
+		         rect->x2, rect->y2);
+
+  goo_tmp = create_appearance_string (NULL, 12.0);    //default font
+
+  annot = new AnnotFreeText (doc->doc, &pdf_rect, goo_tmp);
+  delete goo_tmp;
+
+  poppler_annot = _poppler_annot_free_text_new (annot);
+  return poppler_annot;
 }
 
 static void
