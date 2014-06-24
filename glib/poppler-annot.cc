@@ -1705,6 +1705,28 @@ poppler_annot_free_text_set_quadding (PopplerAnnotFreeText         *poppler_anno
 
   annot = static_cast<AnnotFreeText *>(POPPLER_ANNOT (poppler_annot)->annot);
   annot->setQuadding ((AnnotFreeText::AnnotFreeTextQuadding)quadding);
+
+PopplerAnnotFreeTextIntent
+poppler_annot_free_text_get_intent (PopplerAnnotFreeText *poppler_annot)
+{
+  AnnotFreeText *annot;
+
+  g_return_val_if_fail (POPPLER_IS_ANNOT_FREE_TEXT (poppler_annot), POPPLER_ANNOT_FREE_TEXT_INTENT_FREE_TEXT);
+
+  annot = static_cast<AnnotFreeText *>(POPPLER_ANNOT (poppler_annot)->annot);
+  return (PopplerAnnotFreeTextIntent) annot->getIntent ();
+}
+
+void
+poppler_annot_free_text_set_intent (PopplerAnnotFreeText      *poppler_annot,
+                                    PopplerAnnotFreeTextIntent intent)
+{
+  AnnotFreeText *annot;
+
+  g_return_if_fail (POPPLER_IS_ANNOT_FREE_TEXT (poppler_annot));
+
+  annot = static_cast<AnnotFreeText *>(POPPLER_ANNOT (poppler_annot)->annot);
+  annot->setIntent ((AnnotFreeText::AnnotFreeTextIntent) intent);
 }
 
 /**
