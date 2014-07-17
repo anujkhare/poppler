@@ -73,6 +73,10 @@ G_BEGIN_DECLS
 #define POPPLER_ANNOT_SQUARE(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), POPPLER_TYPE_ANNOT_SQUARE, PopplerAnnotSquare))
 #define POPPLER_IS_ANNOT_SQUARE(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), POPPLER_TYPE_ANNOT_SQUARE))
 
+#define POPPLER_TYPE_ANNOT_STAMP             (poppler_annot_stamp_get_type ())
+#define POPPLER_ANNOT_STAMP(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), POPPLER_TYPE_ANNOT_STAMP, PopplerAnnotStamp))
+#define POPPLER_IS_ANNOT_STAMP(obj)          (G_TYPE_CHECK_INSTANCE_TYPE ((obj), POPPLER_TYPE_ANNOT_STAMP))
+
 typedef enum
 {
   POPPLER_ANNOT_UNKNOWN,
@@ -169,6 +173,22 @@ struct _PopplerAnnotCalloutLine
   gdouble  x3;
   gdouble  y3;
 };
+
+/* The standard names for stamp annotation icons */
+#define POPPLER_ANNOT_STAMP_ICON_APPROVED            "Approved"
+#define POPPLER_ANNOT_STAMP_ICON_ASIS                "AsIs"
+#define POPPLER_ANNOT_STAMP_ICON_CONFIDENTIAL        "Confidential"
+#define POPPLER_ANNOT_STAMP_ICON_DEPARTMENTAL        "Departmental"
+#define POPPLER_ANNOT_STAMP_ICON_DRAFT               "Draft"            //Default type
+#define POPPLER_ANNOT_STAMP_ICON_EXPERIMENTAL        "Experimental"
+#define POPPLER_ANNOT_STAMP_ICON_EXPIRED             "Expired"
+#define POPPLER_ANNOT_STAMP_ICON_FINAL               "Final"
+#define POPPLER_ANNOT_STAMP_ICON_FORCOMMENT          "ForComment"
+#define POPPLER_ANNOT_STAMP_ICON_FORPUBLICRELEASE    "ForPublicRelease"
+#define POPPLER_ANNOT_STAMP_ICON_NOTAPPROVED         "NotApproved"
+#define POPPLER_ANNOT_STAMP_ICON_NOTFORPUBLICRELEASE "NotForPublicRelease"
+#define POPPLER_ANNOT_STAMP_ICON_SOLD                "Sold"
+#define POPPLER_ANNOT_STAMP_ICON_TOPSECRET           "TopSecret"
 
 GType                         poppler_annot_get_type                           (void) G_GNUC_CONST;
 PopplerAnnotType              poppler_annot_get_annot_type                     (PopplerAnnot *poppler_annot);
@@ -290,6 +310,14 @@ PopplerAnnot                 *poppler_annot_square_new                         (
 void                          poppler_annot_square_set_interior_color          (PopplerAnnotSquare *poppler_annot,
 										PopplerColor       *poppler_color);
 PopplerColor                 *poppler_annot_square_get_interior_color          (PopplerAnnotSquare *poppler_annot);
+
+/* PopplerAnnotStamp */
+GType                         poppler_annot_stamp_get_type                     (void) G_GNUC_CONST;
+PopplerAnnot                 *poppler_annot_stamp_new                          (PopplerDocument   *doc,
+										PopplerRectangle  *rect);
+gchar                        *poppler_annot_stamp_get_icon                     (PopplerAnnotStamp *poppler_annot);
+void                          poppler_annot_stamp_set_icon                     (PopplerAnnotStamp *poppler_annot,
+										const gchar       *icon);
 
 G_END_DECLS
 

@@ -40,6 +40,7 @@ typedef struct _PopplerAnnotScreenClass         PopplerAnnotScreenClass;
 typedef struct _PopplerAnnotLineClass           PopplerAnnotLineClass;
 typedef struct _PopplerAnnotCircleClass         PopplerAnnotCircleClass;
 typedef struct _PopplerAnnotSquareClass         PopplerAnnotSquareClass;
+typedef struct _PopplerAnnotStampClass          PopplerAnnotStampClass;
 
 struct _PopplerAnnotClass
 {
@@ -150,6 +151,16 @@ struct _PopplerAnnotSquareClass
   PopplerAnnotMarkupClass parent_class;
 };
 
+struct _PopplerAnnotStamp
+{
+  PopplerAnnotMarkup parent_instance;
+};
+
+struct _PopplerAnnotStampClass
+{
+  PopplerAnnotMarkupClass parent_class;
+};
+
 G_DEFINE_TYPE (PopplerAnnot, poppler_annot, G_TYPE_OBJECT)
 G_DEFINE_TYPE (PopplerAnnotMarkup, poppler_annot_markup, POPPLER_TYPE_ANNOT)
 G_DEFINE_TYPE (PopplerAnnotTextMarkup, poppler_annot_text_markup, POPPLER_TYPE_ANNOT_MARKUP)
@@ -161,6 +172,7 @@ G_DEFINE_TYPE (PopplerAnnotScreen, poppler_annot_screen, POPPLER_TYPE_ANNOT)
 G_DEFINE_TYPE (PopplerAnnotLine, poppler_annot_line, POPPLER_TYPE_ANNOT_MARKUP)
 G_DEFINE_TYPE (PopplerAnnotCircle, poppler_annot_circle, POPPLER_TYPE_ANNOT_MARKUP)
 G_DEFINE_TYPE (PopplerAnnotSquare, poppler_annot_square, POPPLER_TYPE_ANNOT_MARKUP)
+G_DEFINE_TYPE (PopplerAnnotStamp, poppler_annot_stamp, POPPLER_TYPE_ANNOT_MARKUP)
 
 static PopplerAnnot *
 _poppler_create_annot (GType annot_type, Annot *annot)
@@ -707,6 +719,49 @@ poppler_annot_square_new (PopplerDocument  *doc,
 
   return _poppler_annot_square_new (annot);
 }
+
+static void
+poppler_annot_stamp_init (PopplerAnnotStamp *poppler_annot)
+{
+}
+
+static void
+poppler_annot_stamp_class_init (PopplerAnnotStampClass *klass)
+{
+}
+
+PopplerAnnot *
+_poppler_annot_stamp_new (Annot *annot)
+{
+  return _poppler_create_annot (POPPLER_TYPE_ANNOT_STAMP, annot);
+}
+
+/**
+ * poppler_annot_stamp_new:
+ * @doc: a #PopplerDocument
+ * @rect: a #PopplerRectangle
+ *
+ * Creates a new stamp annotation that will be
+ * located on @rect when added to a page. See
+ * poppler_page_add_annot()
+ *
+ * Return value: A newly created #PopplerAnnotStamp annotation
+ *
+ * Since: 0.16
+ */
+PopplerAnnot *
+poppler_annot_stamp_new (PopplerDocument  *doc,
+			 PopplerRectangle *rect)
+{
+  Annot *annot;
+  PDFRectangle pdf_rect(rect->x1, rect->y1,
+			rect->x2, rect->y2);
+
+  annot = new AnnotStamp (doc->doc, &pdf_rect);
+
+  return _poppler_annot_stamp_new (annot);
+}
+
 
 /* Public methods */
 /**
@@ -1994,3 +2049,57 @@ poppler_annot_square_set_interior_color (PopplerAnnotSquare *poppler_annot,
 
   poppler_annot_geometry_set_interior_color (POPPLER_ANNOT (poppler_annot), poppler_color);
 }
+
+/* PopplerAnnotStamp */
+
+/**
+ * poppler_annot_stamp_get_icon:
+ * @poppler_annot: a #PopplerAnnotStamp
+ *
+ * Gets name of the icon of @poppler_annot.
+ *
+ * Return value: a new allocated string containing the icon name
+ */
+gchar *
+poppler_annot_stamp_get_icon (PopplerAnnotStamp *poppler_annot)
+{
+  AnnotStamp *annot;
+  GooString  *stamp;
+
+  g_return_val_if_fail (POPPLER_IS_ANNOT_STAMP (poppler_annot), NULL);
+
+  annot = static_cast<AnnotStamp *>(POPPLER_ANNOT (poppler_annot)->annot);
+
+  stamp = annot->getIcon ();
+
+  return stamp ? _poppler_goo_string_to_utf8 (stamp) : NULL;
+}
+
+/**
+ * poppler_annot_stamp_set_icon:
+ * @poppler_annot: a #PopplerAnnotstamp
+ * @icon: the name of an icon for stamp annotation
+ *
+ * Sets the icon of stamp annotation @poppler_annot. The following
+ * predefined icons are currently supported:
+ * <variablelist>
+ * </variablelist>
+ *
+ * Since: 0.16
+ */
+void
+poppler_annot_stamp_set_icon (PopplerAnnotStamp *poppler_annot,
+			      const gchar       *icon)
+{
+  AnnotStamp *annot;
+  GooString  *stamp;
+
+  g_return_if_fail (POPPLER_IS_ANNOT_STAMP (poppler_annot));
+
+  annot = static_cast<AnnotStamp *>(POPPLER_ANNOT (poppler_annot)->annot);
+
+  stamp = new GooString(icon);
+  annot->setIcon(stamp);
+  delete stamp;
+}
+
