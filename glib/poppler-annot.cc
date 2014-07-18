@@ -41,6 +41,7 @@ typedef struct _PopplerAnnotLineClass           PopplerAnnotLineClass;
 typedef struct _PopplerAnnotCircleClass         PopplerAnnotCircleClass;
 typedef struct _PopplerAnnotSquareClass         PopplerAnnotSquareClass;
 typedef struct _PopplerAnnotPolygonClass        PopplerAnnotPolygonClass;
+typedef struct _PopplerAnnotInkClass            PopplerAnnotInkClass;
 
 struct _PopplerAnnotClass
 {
@@ -161,6 +162,16 @@ struct _PopplerAnnotPolygonClass
   PopplerAnnotMarkupClass parent_class;
 };
 
+struct _PopplerAnnotInk
+{
+  PopplerAnnotMarkup parent_instance;
+};
+
+struct _PopplerAnnotInkClass
+{
+  PopplerAnnotMarkupClass parent_class;
+};
+
 G_DEFINE_TYPE (PopplerAnnot, poppler_annot, G_TYPE_OBJECT)
 G_DEFINE_TYPE (PopplerAnnotMarkup, poppler_annot_markup, POPPLER_TYPE_ANNOT)
 G_DEFINE_TYPE (PopplerAnnotTextMarkup, poppler_annot_text_markup, POPPLER_TYPE_ANNOT_MARKUP)
@@ -173,6 +184,7 @@ G_DEFINE_TYPE (PopplerAnnotLine, poppler_annot_line, POPPLER_TYPE_ANNOT_MARKUP)
 G_DEFINE_TYPE (PopplerAnnotCircle, poppler_annot_circle, POPPLER_TYPE_ANNOT_MARKUP)
 G_DEFINE_TYPE (PopplerAnnotSquare, poppler_annot_square, POPPLER_TYPE_ANNOT_MARKUP)
 G_DEFINE_TYPE (PopplerAnnotPolygon, poppler_annot_polygon, POPPLER_TYPE_ANNOT_MARKUP)
+G_DEFINE_TYPE (PopplerAnnotInk, poppler_annot_ink, POPPLER_TYPE_ANNOT_MARKUP)
 
 static PopplerAnnot *
 _poppler_create_annot (GType annot_type, Annot *annot)
@@ -868,6 +880,91 @@ poppler_annot_polygon_new_poly_line (PopplerDocument  *doc,
 
   poppler_annot = _poppler_annot_polygon_new (annot);
   poppler_annot_polygon_set_vertices (POPPLER_ANNOT_POLYGON (poppler_annot), vertices);
+
+  return poppler_annot;
+}
+
+static AnnotPath **
+create_annot_path_list_from_poppler_path_list (GArray *path_list)
+{
+  AnnotPath **annot_paths;
+
+  g_return_val_if_fail (!path_list && path_list->len > 0, NULL);
+
+  annot_paths = (AnnotPath **) g_malloc0_n (sizeof (AnnotPath *), path_list->len);
+
+  for (guint i = 0; i < path_list->len; ++i) {
+    GArray *points = &g_array_index (path_list, GArray, i);
+    annot_paths[i] = create_annot_path_from_poppler_points (points);
+  }
+
+  return annot_paths;
+}
+
+static GArray *
+create_poppler_path_list_from_annot_path_list (AnnotPath **annot_paths,
+                                               gint        num_paths)
+{
+  GArray *paths_list = NULL;
+
+  paths_list = g_array_sized_new (FALSE, FALSE, sizeof (GArray *), num_paths);
+  g_array_set_size (paths_list, num_paths);
+
+  for (gint i = 0; i < num_paths; ++i) {
+    GArray *points = &g_array_index (paths_list, GArray, i);
+
+    points = create_poppler_points_from_annot_path (annot_paths[i]);
+  }
+
+  return paths_list;
+}
+
+PopplerAnnot *
+_poppler_annot_ink_new (Annot *annot)
+{
+  return _poppler_create_annot (POPPLER_TYPE_ANNOT_INK, annot);
+}
+
+static void
+poppler_annot_ink_init (PopplerAnnotInk *poppler_annot)
+{
+}
+
+static void
+poppler_annot_ink_class_init (PopplerAnnotInkClass *klass)
+{
+}
+
+/**
+ * poppler_annot_ink_new:
+ * @doc: a #PopplerDocument
+ * @rect: a #PopplerRectangle
+ * @paths_list: (element-type GArray): A #GArray of #GArray<!-- -->s
+ *   of #PopplerPoint<!-- -->s
+ *
+ * Creates a new ink annotation that will be
+ * located on @rect when added to a page. See
+ * poppler_page_add_annot()
+ *
+ * Return value: a newly created #PopplerAnnotInk annotation
+ *
+ * Since: TODO
+**/
+PopplerAnnot *
+poppler_annot_ink_new (PopplerDocument  *doc,
+                       PopplerRectangle *rect,
+                       GArray           *paths_list)
+{
+  PopplerAnnot *poppler_annot;
+  Annot        *annot;
+
+  PDFRectangle pdf_rect(rect->x1, rect->y1,
+		        rect->x2, rect->y2);
+
+  annot = new AnnotInk (doc->doc, &pdf_rect);
+
+  poppler_annot = _poppler_annot_ink_new (annot);
+  poppler_annot_ink_set_paths_list (POPPLER_ANNOT_INK (poppler_annot), paths_list);
 
   return poppler_annot;
 }
@@ -2349,3 +2446,52 @@ poppler_annot_polygon_get_vertices (PopplerAnnotPolygon *poppler_annot)
   return create_poppler_points_from_annot_path (annot->getVertices());
 }
 
+/* PopplerAnnotInk */
+/**
+ * poppler_annot_ink_set_vertices:
+ * @poppler_annot: A #PopplerAnnotInk
+ * @paths_list: (element-type GArray): A #GArray of #GArray<!-- -->s
+ *   of #PopplerPoint<!-- -->s
+ *
+ * Set the paths (Points) list of the ink in @poppler_annot.
+ *
+ * Since: TODO
+ **/
+void
+poppler_annot_ink_set_paths_list (PopplerAnnotInk *poppler_annot,
+                                  GArray          *paths_list)
+{
+  AnnotInk *annot;
+
+  g_return_if_fail (POPPLER_IS_ANNOT_INK (poppler_annot));
+  g_return_if_fail (paths_list != NULL && paths_list->len > 0);
+
+  annot = static_cast<AnnotInk *>(POPPLER_ANNOT (poppler_annot)->annot);
+  AnnotPath **annot_paths = create_annot_path_list_from_poppler_path_list (paths_list);
+  annot->setInkList (annot_paths, paths_list->len);
+  delete annot_paths;    //FIXME??
+}
+
+/**
+ * poppler_annot_ink_get_paths_list:
+ * @poppler_annot: A #PopplerAnnotInk
+ *
+ * Returns a #GArray of #GArray<!-- -->s of #PopplerPoint items,
+ * each of which represent a stroked path of a #PopplerAnnotInk.
+ * This array must be freed when done.
+ *
+ * Return value: (element-type GArray) (transfer full): A #GArray of #GArray<!-- -->s
+ *
+ * Since: TODO
+ **/
+GArray *
+poppler_annot_ink_get_paths_list (PopplerAnnotInk *poppler_annot)
+{
+  AnnotInk *annot;
+
+  g_return_val_if_fail (POPPLER_IS_ANNOT_INK (poppler_annot), NULL);
+
+  annot = static_cast<AnnotInk *>(POPPLER_ANNOT (poppler_annot)->annot);
+
+  return create_poppler_path_list_from_annot_path_list (annot->getInkList(), annot->getInkListLength());
+}

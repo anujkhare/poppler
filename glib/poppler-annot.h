@@ -77,6 +77,10 @@ G_BEGIN_DECLS
 #define POPPLER_ANNOT_POLYGON(obj)           (G_TYPE_CHECK_INSTANCE_CAST ((obj), POPPLER_TYPE_ANNOT_POLYGON, PopplerAnnotPolygon))
 #define POPPLER_IS_ANNOT_POLYGON(obj)        (G_TYPE_CHECK_INSTANCE_TYPE ((obj), POPPLER_TYPE_ANNOT_POLYGON))
 
+#define POPPLER_TYPE_ANNOT_INK               (poppler_annot_ink_get_type ())
+#define POPPLER_ANNOT_INK(obj)               (G_TYPE_CHECK_INSTANCE_CAST ((obj), POPPLER_TYPE_ANNOT_INK, PopplerAnnotInk))
+#define POPPLER_IS_ANNOT_INK(obj)            (G_TYPE_CHECK_INSTANCE_TYPE ((obj), POPPLER_TYPE_ANNOT_INK))
+
 typedef enum
 {
   POPPLER_ANNOT_UNKNOWN,
@@ -329,6 +333,15 @@ PopplerAnnot                 *poppler_annot_polygon_new_poly_line              (
 void                          poppler_annot_polygon_set_vertices               (PopplerAnnotPolygon *poppler_annot,
                                                                                 GArray              *vertices);
 GArray                       *poppler_annot_polygon_get_vertices               (PopplerAnnotPolygon *poppler_annot);
+
+/* PopplerAnnotink */
+GType                         poppler_annot_ink_get_type                       (void) G_GNUC_CONST;
+PopplerAnnot                 *poppler_annot_ink_new                            (PopplerDocument     *doc,
+                                                                                PopplerRectangle    *rect,
+                                                                                GArray              *path_list);
+void                          poppler_annot_ink_set_paths_list                 (PopplerAnnotInk     *poppler_annot,
+                                                                                GArray              *path_list);
+GArray                       *poppler_annot_ink_get_paths_list                 (PopplerAnnotInk     *poppler_annot);
 
 G_END_DECLS
 
