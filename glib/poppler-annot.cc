@@ -1839,6 +1839,7 @@ poppler_annot_free_text_set_quadding (PopplerAnnotFreeText         *poppler_anno
 
   annot = static_cast<AnnotFreeText *>(POPPLER_ANNOT (poppler_annot)->annot);
   annot->setQuadding ((AnnotFreeText::AnnotFreeTextQuadding)quadding);
+}
 
 PopplerAnnotFreeTextIntent
 poppler_annot_free_text_get_intent (PopplerAnnotFreeText *poppler_annot)
