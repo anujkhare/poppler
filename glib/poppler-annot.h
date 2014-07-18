@@ -73,6 +73,10 @@ G_BEGIN_DECLS
 #define POPPLER_ANNOT_SQUARE(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), POPPLER_TYPE_ANNOT_SQUARE, PopplerAnnotSquare))
 #define POPPLER_IS_ANNOT_SQUARE(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), POPPLER_TYPE_ANNOT_SQUARE))
 
+#define POPPLER_TYPE_ANNOT_POLYGON           (poppler_annot_polygon_get_type ())
+#define POPPLER_ANNOT_POLYGON(obj)           (G_TYPE_CHECK_INSTANCE_CAST ((obj), POPPLER_TYPE_ANNOT_POLYGON, PopplerAnnotPolygon))
+#define POPPLER_IS_ANNOT_POLYGON(obj)        (G_TYPE_CHECK_INSTANCE_TYPE ((obj), POPPLER_TYPE_ANNOT_POLYGON))
+
 typedef enum
 {
   POPPLER_ANNOT_UNKNOWN,
@@ -313,6 +317,18 @@ PopplerAnnot                 *poppler_annot_square_new                         (
 void                          poppler_annot_square_set_interior_color          (PopplerAnnotSquare *poppler_annot,
 										PopplerColor       *poppler_color);
 PopplerColor                 *poppler_annot_square_get_interior_color          (PopplerAnnotSquare *poppler_annot);
+
+/* PopplerAnnotPolygon */
+GType                         poppler_annot_polygon_get_type                   (void) G_GNUC_CONST;
+PopplerAnnot                 *poppler_annot_polygon_new_closed                 (PopplerDocument     *doc,
+                                                                                PopplerRectangle    *rect,
+                                                                                GArray              *vertices);
+PopplerAnnot                 *poppler_annot_polygon_new_poly_line              (PopplerDocument     *doc,
+                                                                                PopplerRectangle    *rect,
+                                                                                GArray              *vertices);
+void                          poppler_annot_polygon_set_vertices               (PopplerAnnotPolygon *poppler_annot,
+                                                                                GArray              *vertices);
+GArray                       *poppler_annot_polygon_get_vertices               (PopplerAnnotPolygon *poppler_annot);
 
 G_END_DECLS
 
