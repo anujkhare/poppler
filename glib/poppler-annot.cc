@@ -1808,6 +1808,68 @@ poppler_annot_callout_line_free (PopplerAnnotCalloutLine *callout)
   g_free (callout);
 }
 
+/* PopplerFontDescription */
+POPPLER_DEFINE_BOXED_TYPE (PopplerFontDescription, poppler_font_description,
+			   poppler_font_description_copy,
+			   poppler_font_description_free)
+
+/**
+ * poppler_font_description_new:
+ *
+ * Creates a new empty #PopplerFontDescription.
+ *
+ * Return value: a new allocated #PopplerFontDescription, %NULL in other case.
+ *               It must be freed with poppler_font_description_free when done.
+ **/
+PopplerFontDescription *
+poppler_font_description_new (void)
+{
+  return g_new0 (PopplerFontDescription, 1);
+}
+
+/**
+ * poppler_font_description_copy:
+ * @font: the #PopplerFontDescription to be copied.
+ *
+ * It does copy @font to a new #PopplerFontDescription.
+ *
+ * Return value: a new allocated #PopplerFontDescription as exact copy of
+ *               @font, %NULL in other case. It must be freed with
+                 poppler_font_description_free when done.
+ **/
+PopplerFontDescription *
+poppler_font_description_copy (PopplerFontDescription *appearance)
+{
+  PopplerFontDescription *new_appearance;
+
+  g_return_val_if_fail (appearance != NULL, NULL);
+
+  new_appearance = g_new0 (PopplerFontDescription, 1);
+
+  *new_appearance = *appearance;
+  new_appearance->name = g_strdup (appearance->name);
+  return new_appearance;
+}
+
+/**
+ * poppler_font_description_free:
+ * @appearance: a #PopplerFontDescription
+ *
+ * Frees the memory used by #PopplerFontDescription.
+ **/
+void
+poppler_font_description_free (PopplerFontDescription *appearance)
+{
+ if (appearance->name)
+        g_free (appearance->name);
+
+ if (appearance->color)
+        g_free (appearance->color);
+
+  g_free (appearance);
+}
+
+
 
 /* PopplerAnnotMovie */
 /**
