@@ -40,6 +40,7 @@ typedef struct _PopplerAnnotScreenClass         PopplerAnnotScreenClass;
 typedef struct _PopplerAnnotLineClass           PopplerAnnotLineClass;
 typedef struct _PopplerAnnotCircleClass         PopplerAnnotCircleClass;
 typedef struct _PopplerAnnotSquareClass         PopplerAnnotSquareClass;
+typedef struct _PopplerAnnotPolygonClass        PopplerAnnotPolygonClass;
 
 struct _PopplerAnnotClass
 {
@@ -150,6 +151,16 @@ struct _PopplerAnnotSquareClass
   PopplerAnnotMarkupClass parent_class;
 };
 
+struct _PopplerAnnotPolygon
+{
+  PopplerAnnotMarkup parent_instance;
+};
+
+struct _PopplerAnnotPolygonClass
+{
+  PopplerAnnotMarkupClass parent_class;
+};
+
 G_DEFINE_TYPE (PopplerAnnot, poppler_annot, G_TYPE_OBJECT)
 G_DEFINE_TYPE (PopplerAnnotMarkup, poppler_annot_markup, POPPLER_TYPE_ANNOT)
 G_DEFINE_TYPE (PopplerAnnotTextMarkup, poppler_annot_text_markup, POPPLER_TYPE_ANNOT_MARKUP)
@@ -161,6 +172,7 @@ G_DEFINE_TYPE (PopplerAnnotScreen, poppler_annot_screen, POPPLER_TYPE_ANNOT)
 G_DEFINE_TYPE (PopplerAnnotLine, poppler_annot_line, POPPLER_TYPE_ANNOT_MARKUP)
 G_DEFINE_TYPE (PopplerAnnotCircle, poppler_annot_circle, POPPLER_TYPE_ANNOT_MARKUP)
 G_DEFINE_TYPE (PopplerAnnotSquare, poppler_annot_square, POPPLER_TYPE_ANNOT_MARKUP)
+G_DEFINE_TYPE (PopplerAnnotPolygon, poppler_annot_polygon, POPPLER_TYPE_ANNOT_MARKUP)
 
 static PopplerAnnot *
 _poppler_create_annot (GType annot_type, Annot *annot)
@@ -706,6 +718,116 @@ poppler_annot_square_new (PopplerDocument  *doc,
   annot = new AnnotGeometry (doc->doc, &pdf_rect, Annot::typeSquare);
 
   return _poppler_annot_square_new (annot);
+}
+
+static AnnotPath *
+create_annot_path_from_poppler_points (GArray *points)
+{
+  AnnotCoord **path;
+
+  g_return_val_if_fail (points != NULL, NULL);
+  g_return_val_if_fail (points->len > 0, NULL);
+
+  path = (AnnotCoord **) g_malloc0_n (sizeof (AnnotCoord *), points->len);
+
+  for (guint i = 0; i < points->len; ++i) {
+    PopplerPoint *point = &g_array_index (points, PopplerPoint, i);
+    path[i] = new AnnotCoord (point->x, point->y);
+  }
+
+  return new AnnotPath (path, points->len);
+}
+
+static GArray *
+create_poppler_points_from_annot_path (AnnotPath *path)
+{
+  GArray *points = NULL;
+  guint   path_len;
+
+  path_len = path->getCoordsLength ();
+
+  points = g_array_sized_new (FALSE, FALSE, sizeof (PopplerPoint), path_len);
+  g_array_set_size (points, path_len);
+
+  for (guint i = 0; i < path_len; ++i) {
+    PopplerPoint *point = &g_array_index (points, PopplerPoint, i);
+
+    point->x = path->getX (i);
+    point->y = path->getY (i);
+  }
+
+  return points;
+}
+
+PopplerAnnot *
+_poppler_annot_polygon_new (Annot *annot)
+{
+  return _poppler_create_annot (POPPLER_TYPE_ANNOT_POLYGON, annot);
+}
+
+static void
+poppler_annot_polygon_init (PopplerAnnotPolygon *poppler_annot)
+{
+}
+
+static void
+poppler_annot_polygon_class_init (PopplerAnnotPolygonClass *klass)
+{
+}
+
+/**
+ * poppler_annot_polygon_new_closed:
+ * @doc: a #PopplerDocument
+ * @rect: a #PopplerRectangle
+ *
+ * Creates a new closed Polygon annotation that will be
+ * located on @rect when added to a page. See
+ * poppler_page_add_annot()
+ *
+ * Return value: a newly created #PopplerAnnotPolygon annotation
+ *
+ * Since: 0.27
+**/
+PopplerAnnot *
+poppler_annot_polygon_new_closed (PopplerDocument  *doc,
+                                  PopplerRectangle *rect)
+{
+  PopplerAnnot *poppler_annot;
+  Annot        *annot;
+
+  PDFRectangle pdf_rect(rect->x1, rect->y1,
+                        rect->x2, rect->y2);
+
+  annot = new AnnotPolygon (doc->doc, &pdf_rect, Annot::typePolygon);
+
+  return _poppler_annot_polygon_new (annot);
+}
+
+/**
+ * poppler_annot_polygon_new_poly_line:
+ * @doc: a #PopplerDocument
+ * @rect: a #PopplerRectangle
+ *
+ * Creates a new PolyLine annotation that will be
+ * located on @rect when added to a page. See
+ * poppler_page_add_annot()
+ *
+ * Return value: a newly created #PopplerAnnotPolygon annotation
+ *
+ * Since: 0.27
+*/
+PopplerAnnot *
+poppler_annot_polygon_new_poly_line (PopplerDocument  *doc,
+                                     PopplerRectangle *rect)
+{
+  Annot        *annot;
+
+  PDFRectangle pdf_rect(rect->x1, rect->y1,
+			rect->x2, rect->y2);
+
+  annot = new AnnotPolygon (doc->doc, &pdf_rect, Annot::typePolyLine);
+
+  return _poppler_annot_polygon_new (annot);
 }
 
 /* Public methods */
@@ -1994,3 +2116,53 @@ poppler_annot_square_set_interior_color (PopplerAnnotSquare *poppler_annot,
 
   poppler_annot_geometry_set_interior_color (POPPLER_ANNOT (poppler_annot), poppler_color);
 }
+
+/* PopplerAnnotPolygon */
+/**
+ * poppler_annot_polygon_set_vertices:
+ * @poppler_annot: A #PopplerAnnotPolygon
+ * @vertices: (element-type PopplerPoint): A #GArray of
+ *   #PopplerPoint<!-- -->s
+ *
+ * Set the path (Points) of the polygon in @poppler_annot.
+ *
+ * Since: 0.27
+ **/
+void
+poppler_annot_polygon_set_vertices (PopplerAnnotPolygon *poppler_annot,
+                                    GArray              *vertices)
+{
+  AnnotPolygon *annot;
+
+  g_return_if_fail (POPPLER_IS_ANNOT_POLYGON (poppler_annot));
+  g_return_if_fail (vertices != NULL && vertices->len > 0);
+
+  annot = static_cast<AnnotPolygon *>(POPPLER_ANNOT (poppler_annot)->annot);
+  AnnotPath *path = create_annot_path_from_poppler_points (vertices);
+  annot->setVertices (path);
+  delete path;    //FIXME??
+}
+
+/**
+ * poppler_annot_polygon_get_vertices:
+ * @poppler_annot: A #PopplerAnnotPolygon
+ *
+ * Returns a #GArray of #PopplerPoint items that represent the stroked path
+ * of a #PopplerAnnotPolygon. This array must be freed when done.
+ *
+ * Return value: (element-type PopplerPoint) (transfer full): A #GArray of #PopplerPoint
+ *
+ * Since: 0.27
+ **/
+GArray *
+poppler_annot_polygon_get_vertices (PopplerAnnotPolygon *poppler_annot)
+{
+  AnnotPolygon *annot;
+
+  g_return_val_if_fail (POPPLER_IS_ANNOT_POLYGON (poppler_annot), NULL);
+
+  annot = static_cast<AnnotPolygon *>(POPPLER_ANNOT (poppler_annot)->annot);
+
+  return create_poppler_points_from_annot_path (annot->getVertices());
+}
+
