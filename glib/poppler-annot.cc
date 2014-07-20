@@ -755,7 +755,8 @@ create_annot_path_from_poppler_points (GArray *points)
 {
   AnnotCoord **path;
 
-  g_return_val_if_fail (!points && points->len > 0, NULL);
+  g_return_val_if_fail (points != NULL, NULL);
+  g_return_val_if_fail (points->len > 0, NULL);
 
   path = (AnnotCoord **) g_malloc0_n (sizeof (AnnotCoord *), points->len);
 
@@ -808,8 +809,6 @@ poppler_annot_polygon_class_init (PopplerAnnotPolygonClass *klass)
  * poppler_annot_polygon_new_closed:
  * @doc: a #PopplerDocument
  * @rect: a #PopplerRectangle
- * @vertices: (element-type PopplerPoint): A #GArray of
- *   #PopplerPoint<!-- -->s
  *
  * Creates a new closed Polygon annotation that will be
  * located on @rect when added to a page. See
@@ -821,10 +820,8 @@ poppler_annot_polygon_class_init (PopplerAnnotPolygonClass *klass)
 **/
 PopplerAnnot *
 poppler_annot_polygon_new_closed (PopplerDocument  *doc,
-                                  PopplerRectangle *rect,
-                                  GArray           *vertices)
+                                  PopplerRectangle *rect)
 {
-  PopplerAnnot *poppler_annot;
   Annot        *annot;
 
   PDFRectangle pdf_rect(rect->x1, rect->y1,
@@ -832,18 +829,13 @@ poppler_annot_polygon_new_closed (PopplerDocument  *doc,
 
   annot = new AnnotPolygon (doc->doc, &pdf_rect, Annot::typePolygon);
 
-  poppler_annot = _poppler_annot_polygon_new (annot);
-  poppler_annot_polygon_set_vertices (POPPLER_ANNOT_POLYGON (poppler_annot), vertices);
-
-  return poppler_annot;
+  return _poppler_annot_polygon_new (annot);
 }
 
 /**
  * poppler_annot_polygon_new_poly_line:
  * @doc: a #PopplerDocument
  * @rect: a #PopplerRectangle
- * @vertices: (element-type PopplerPoint): A #GArray of
- *   #PopplerPoint<!-- -->s
  *
  * Creates a new PolyLine annotation that will be
  * located on @rect when added to a page. See
@@ -855,10 +847,8 @@ poppler_annot_polygon_new_closed (PopplerDocument  *doc,
 **/
 PopplerAnnot *
 poppler_annot_polygon_new_poly_line (PopplerDocument  *doc,
-                                     PopplerRectangle *rect,
-                                     GArray           *vertices)
+                                     PopplerRectangle *rect)
 {
-  PopplerAnnot *poppler_annot;
   Annot        *annot;
 
   PDFRectangle pdf_rect(rect->x1, rect->y1,
@@ -866,10 +856,7 @@ poppler_annot_polygon_new_poly_line (PopplerDocument  *doc,
 
   annot = new AnnotPolygon (doc->doc, &pdf_rect, Annot::typePolyLine);
 
-  poppler_annot = _poppler_annot_polygon_new (annot);
-  poppler_annot_polygon_set_vertices (POPPLER_ANNOT_POLYGON (poppler_annot), vertices);
-
-  return poppler_annot;
+  return _poppler_annot_polygon_new (annot);
 }
 
 /* Public methods */

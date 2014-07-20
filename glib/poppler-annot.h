@@ -321,11 +321,9 @@ PopplerColor                 *poppler_annot_square_get_interior_color          (
 /* PopplerAnnotPolygon */
 GType                         poppler_annot_polygon_get_type                   (void) G_GNUC_CONST;
 PopplerAnnot                 *poppler_annot_polygon_new_closed                 (PopplerDocument     *doc,
-                                                                                PopplerRectangle    *rect,
-                                                                                GArray              *vertices);
+                                                                                PopplerRectangle    *rect);
 PopplerAnnot                 *poppler_annot_polygon_new_poly_line              (PopplerDocument     *doc,
-                                                                                PopplerRectangle    *rect,
-                                                                                GArray              *vertices);
+                                                                                PopplerRectangle    *rect);
 void                          poppler_annot_polygon_set_vertices               (PopplerAnnotPolygon *poppler_annot,
                                                                                 GArray              *vertices);
 GArray                       *poppler_annot_polygon_get_vertices               (PopplerAnnotPolygon *poppler_annot);
