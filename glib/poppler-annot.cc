@@ -1808,6 +1808,68 @@ poppler_annot_callout_line_free (PopplerAnnotCalloutLine *callout)
   g_free (callout);
 }
 
+/* PopplerAnnotAppearance */
+POPPLER_DEFINE_BOXED_TYPE (PopplerAnnotAppearance, poppler_annot_appearance,
+			   poppler_annot_appearance_copy,
+			   poppler_annot_appearance_free)
+
+/**
+ * poppler_annot_appearance_new:
+ *
+ * Creates a new empty #PopplerAnnotAppearance.
+ *
+ * Return value: a new allocated #PopplerAnnotAppearance, %NULL in other case.
+ *               It must be freed with poppler_annot_appearance_free when done.
+ **/
+PopplerAnnotAppearance *
+poppler_annot_appearance_new (void)
+{
+  return g_new0 (PopplerAnnotAppearance, 1);
+}
+
+/**
+ * poppler_annot_appearance_copy:
+ * @font: the #PopplerAnnotAppearance to be copied.
+ *
+ * It does copy @font to a new #PopplerAnnotAppearance.
+ *
+ * Return value: a new allocated #PopplerAnnotAppearance as exact copy of
+ *               @font, %NULL in other case. It must be freed with
+                 poppler_annot_appearance_free when done.
+ **/
+PopplerAnnotAppearance *
+poppler_annot_appearance_copy (PopplerAnnotAppearance *appearance)
+{
+  PopplerAnnotAppearance *new_appearance;
+
+  g_return_val_if_fail (appearance != NULL, NULL);
+
+  new_appearance = g_new0 (PopplerAnnotAppearance, 1);
+
+  *new_appearance = *appearance;
+  new_appearance->font_name = g_strdup (appearance->font_name);
+  return new_appearance;
+}
+
+/**
+ * poppler_annot_appearance_free:
+ * @appearance: a #PopplerAnnotAppearance
+ *
+ * Frees the memory used by #PopplerAnnotAppearance.
+ **/
+void
+poppler_annot_appearance_free (PopplerAnnotAppearance *appearance)
+{
+ if (appearance->font_name)
+        g_free (appearance->font_name);
+
+ if (appearance->color)
+        g_free (appearance->color);
+
+  g_free (appearance);
+}
+
+
 
 /* PopplerAnnotMovie */
 /**

@@ -64,6 +64,7 @@ G_BEGIN_DECLS
 #define POPPLER_IS_ANNOT_LINE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), POPPLER_TYPE_ANNOT_LINE))
 
 #define POPPLER_TYPE_ANNOT_CALLOUT_LINE      (poppler_annot_callout_line_get_type ())
+#define POPPLER_TYPE_ANNOT_APPEARANCE        (poppler_annot_appearance_get_type ())
 
 #define POPPLER_TYPE_ANNOT_CIRCLE            (poppler_annot_circle_get_type ())
 #define POPPLER_ANNOT_CIRCLE(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), POPPLER_TYPE_ANNOT_CIRCLE, PopplerAnnotCircle))
@@ -170,6 +171,13 @@ struct _PopplerAnnotCalloutLine
   gdouble  y3;
 };
 
+struct _PopplerAnnotAppearance
+{
+  PopplerColor *color;
+  gdouble       font_size;
+  gchar        *font_name;
+};
+
 GType                         poppler_annot_get_type                           (void) G_GNUC_CONST;
 PopplerAnnotType              poppler_annot_get_annot_type                     (PopplerAnnot *poppler_annot);
 gchar                        *poppler_annot_get_contents                       (PopplerAnnot *poppler_annot);
@@ -274,6 +282,12 @@ GType                         poppler_annot_callout_line_get_type              (
 PopplerAnnotCalloutLine      *poppler_annot_callout_line_new                   (void);
 PopplerAnnotCalloutLine      *poppler_annot_callout_line_copy                  (PopplerAnnotCalloutLine *callout);
 void                          poppler_annot_callout_line_free                  (PopplerAnnotCalloutLine *callout);
+
+/* PopplerAnnotAppearance */
+GType                         poppler_annot_appearance_get_type                (void) G_GNUC_CONST;
+PopplerAnnotAppearance       *poppler_annot_appearance_new                     (void);
+PopplerAnnotAppearance       *poppler_annot_appearance_copy                    (PopplerAnnotAppearance *appr);
+void                          poppler_annot_appearance_free                    (PopplerAnnotAppearance *appr);
 
 /* PopplerAnnotCircle */
 GType                         poppler_annot_circle_get_type                    (void) G_GNUC_CONST;
