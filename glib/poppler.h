@@ -205,6 +205,7 @@ typedef struct _PopplerAnnotFileAttachment PopplerAnnotFileAttachment;
 typedef struct _PopplerAnnotMovie          PopplerAnnotMovie;
 typedef struct _PopplerAnnotScreen         PopplerAnnotScreen;
 typedef struct _PopplerAnnotCalloutLine    PopplerAnnotCalloutLine;
+typedef struct _PopplerAnnotAppearance     PopplerAnnotAppearance;
 typedef struct _PopplerAnnotLine           PopplerAnnotLine;
 typedef struct _PopplerAnnotCircle         PopplerAnnotCircle;
 typedef struct _PopplerAnnotSquare         PopplerAnnotSquare;
