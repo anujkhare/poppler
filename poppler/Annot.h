@@ -933,6 +933,7 @@ public:
   // getters
   GooString *getAppearanceString() const { return appearanceString; }
   AnnotFreeTextQuadding getQuadding() const { return quadding; }
+  void parseAppearanceString(GooString *da, double &fontsize, AnnotColor* &fontcolor);
   // return rc
   GooString *getStyleString() const { return styleString; }
   AnnotCalloutLine *getCalloutLine() const {  return calloutLine; }
@@ -944,7 +945,6 @@ public:
 protected:
 
   void initialize(PDFDoc *docA, Dict *dict);
-  static void parseAppearanceString(GooString *da, double &fontsize, AnnotColor* &fontcolor);
   void generateFreeTextAppearance();
 
   // required
