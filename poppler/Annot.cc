@@ -1265,7 +1265,7 @@ void Annot::initialize(PDFDoc *docA, Dict *dict) {
   if (dict->lookup("Contents", &obj1)->isString()) {
     contents = obj1.getString()->copy();
   } else {
-    contents = NULL;
+    contents = new GooString();
   }
   obj1.free();
 
@@ -3015,6 +3015,8 @@ void AnnotFreeText::generateFreeTextAppearance()
     fontsize = 10;
   if (fontcolor == NULL)
     fontcolor = new AnnotColor(0, 0, 0); // Black
+  if (!contents)
+         contents = new GooString ();
 
   // Draw box
   GBool doFill = (color && color->getSpace() != AnnotColor::colorTransparent);
