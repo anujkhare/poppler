@@ -53,6 +53,7 @@ static Annotations supported_annots[] = {
     { POPPLER_ANNOT_UNDERLINE,  "Underline" },
     { POPPLER_ANNOT_SQUIGGLY,   "Squiggly" },
     { POPPLER_ANNOT_STRIKE_OUT, "Strike Out" },
+    { POPPLER_ANNOT_FREE_TEXT, "Free Text" },
 };
 
 typedef enum {
@@ -294,6 +295,41 @@ get_text_state (PopplerAnnotText *poppler_annot)
 }
 
 const gchar *
+get_free_text_intent (PopplerAnnotFreeText *poppler_annot)
+{
+    switch (poppler_annot_free_text_get_intent (poppler_annot)) {
+        case POPPLER_ANNOT_FREE_TEXT_INTENT_FREE_TEXT:
+            return "Free Text";
+        case POPPLER_ANNOT_FREE_TEXT_INTENT_CALLOUT:
+            return "Callout";
+        case POPPLER_ANNOT_FREE_TEXT_INTENT_TYPE_WRITER:
+            return "Type Writer";
+        default:
+            return "Unknown";
+    }
+}
+
+const gchar *
+get_free_text_font_size (PopplerAnnotFreeText *poppler_annot)
+{
+    return g_strdup_printf ("%f", poppler_annot_free_text_get_font_size (poppler_annot));
+}
+
+const gchar*
+get_free_text_font_color (PopplerAnnotFreeText *poppler_annot)
+{
+    PopplerColor *poppler_color;
+
+    poppler_color = poppler_annot_free_text_get_font_color (poppler_annot);
+
+    if (!poppler_color)
+        return "";
+
+    return g_strdup_printf ("Red - %d, Blue - %d, Green - %d", poppler_color->red,
+                             poppler_color->blue, poppler_color->green);
+}
+
+const gchar *
 get_free_text_quadding (PopplerAnnotFreeText *poppler_annot)
 {
     switch (poppler_annot_free_text_get_quadding (poppler_annot))
@@ -509,6 +545,9 @@ pgd_annot_view_set_annot_free_text (GtkWidget            *table,
     gchar *text;
 
     pgd_table_add_property (GTK_GRID (table), "<b>Quadding:</b>", get_free_text_quadding (annot), row);
+    pgd_table_add_property (GTK_GRID (table), "<b>Font Size:</b>", get_free_text_font_size (annot), row);
+    pgd_table_add_property (GTK_GRID (table), "<b>Font Color:</b>", get_free_text_font_color (annot), row);
+    pgd_table_add_property (GTK_GRID (table), "<b>Intent:</b>", get_free_text_intent (annot), row);
 
     text = get_free_text_callout_line (annot);
     pgd_table_add_property (GTK_GRID (table), "<b>Callout:</b>", text, row);
@@ -945,6 +984,12 @@ pgd_annots_add_annot (PgdAnnotsDemo *demo)
         case POPPLER_ANNOT_CIRCLE:
             annot = poppler_annot_circle_new (demo->doc, &rect);
             break;
+        case POPPLER_ANNOT_FREE_TEXT: {
+            PopplerFontDescription *poppler_font;
+            poppler_font->size = 12;
+            annot = poppler_annot_free_text_new (demo->doc, &rect, poppler_font);
+            break;
+        }
         case POPPLER_ANNOT_HIGHLIGHT: {
             GArray *quads_array;
 
@@ -983,6 +1028,7 @@ pgd_annots_add_annot (PgdAnnotsDemo *demo)
 
     demo->active_annot = annot;
 
+    poppler_annot_set_contents (annot, "Sample Content");
     poppler_annot_set_color (annot, &color);
     poppler_page_add_annot (demo->page, annot);
     pgd_annots_add_annot_to_model (demo, annot, rect, TRUE);
