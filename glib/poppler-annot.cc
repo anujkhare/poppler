@@ -41,6 +41,9 @@ typedef struct _PopplerAnnotLineClass           PopplerAnnotLineClass;
 typedef struct _PopplerAnnotCircleClass         PopplerAnnotCircleClass;
 typedef struct _PopplerAnnotSquareClass         PopplerAnnotSquareClass;
 
+static PopplerColor *create_poppler_color_from_annot_color (AnnotColor *color);
+static AnnotColor   *create_annot_color_from_poppler_color (PopplerColor *poppler_color);
+
 struct _PopplerAnnotClass
 {
   GObjectClass parent_class;
@@ -79,6 +82,8 @@ struct _PopplerAnnotTextMarkupClass
 struct _PopplerAnnotFreeText
 {
   PopplerAnnotMarkup parent_instance;
+
+  PopplerFontDescription *font;
 };
 
 struct _PopplerAnnotFreeTextClass
@@ -470,10 +475,91 @@ poppler_annot_free_text_class_init (PopplerAnnotFreeTextClass *klass)
 {
 }
 
+static GooString *create_appearance_string (PopplerFontDescription *font)
+{
+  if (!font)
+      return new GooString ("/Invalid_font 10 Tf");
+
+  /* Core does not parse the font name as of yet. */
+  GooString *s = GooString::format("/Invalid_font {0:f} Tf", font->size);
+
+  if (font->color) {
+    AnnotColor   *annot_color;
+    const double *values;
+
+    annot_color = create_annot_color_from_poppler_color (font->color);
+    values = annot_color->getValues ();
+
+    s->appendf (" {0:.2f} {1:.2f} {2:.2f} rg", values[0], values[1], values[2]);
+    delete annot_color;
+  }
+
+  return s;
+}
+
 PopplerAnnot *
 _poppler_annot_free_text_new (Annot *annot)
 {
-  return _poppler_create_annot (POPPLER_TYPE_ANNOT_FREE_TEXT, annot);
+  AnnotFreeText        *annot_ftext;
+  PopplerAnnot         *poppler_annot;
+  GooString            *da;
+  AnnotColor           *annot_color;
+  PopplerAnnotFreeText *poppler_ftext;
+
+  poppler_annot = _poppler_create_annot (POPPLER_TYPE_ANNOT_FREE_TEXT, annot);
+  poppler_ftext = POPPLER_ANNOT_FREE_TEXT (poppler_annot);
+
+  annot_ftext = static_cast<AnnotFreeText *>(annot);
+  da = annot_ftext->getAppearanceString();
+
+  g_assert (da!=NULL && da->getLength()!=0);
+
+  poppler_ftext->font = poppler_font_description_new ();
+  annot_ftext->parseAppearanceString (da, poppler_ftext->font->size, annot_color);
+  poppler_ftext->font->color = create_poppler_color_from_annot_color (annot_color);
+  delete annot_color;
+
+  return poppler_annot;
+}
+
+/**
+ * poppler_annot_free_text_new:
+ * @doc: a #PopplerDocument
+ * @rect: a #PopplerRectangle
+ * @poppler_font: a #PopplerFontDescription
+ *
+ * Creates a Free Text annotation with font attributes taken from
+ * @poppler_font that will be located on @rect when added to a page.
+ * See poppler_page_add_annot().
+ * Annotation takes ownership of the font description.
+ *
+ * Return value: A newly created #PopplerAnnotFreeText annotation
+ *
+ * Since: 0.28
+ */
+PopplerAnnot *
+poppler_annot_free_text_new (PopplerDocument        *doc,
+                             PopplerRectangle       *rect,
+                             PopplerFontDescription *font)
+{
+  PopplerAnnot         *poppler_annot;
+  AnnotFreeText        *annot;
+  GooString            *goo_tmp;
+
+  PDFRectangle pdf_rect (rect->x1, rect->y1,
+                         rect->x2, rect->y2);
+
+  g_return_val_if_fail (font != NULL, NULL);
+
+  goo_tmp = create_appearance_string (font);
+  annot = new AnnotFreeText (doc->doc, &pdf_rect, goo_tmp);
+  delete goo_tmp;
+
+  poppler_annot = _poppler_create_annot (POPPLER_TYPE_ANNOT_FREE_TEXT, annot);
+
+  POPPLER_ANNOT_FREE_TEXT (poppler_annot)->font = font;
+
+  return poppler_annot;
 }
 
 static void
@@ -1659,6 +1745,66 @@ poppler_annot_free_text_get_quadding (PopplerAnnotFreeText *poppler_annot)
 }
 
 /**
+ * poppler_annot_free_text_set_quadding:
+ * @poppler_annot: a #PopplerAnnotFreeText
+ * @quadding: a #PopplerAnnotFreeTextQuadding
+ *
+ * Sets the justification of the text of @poppler_annot.
+ *
+ * Since: 0.28
+ **/
+void
+poppler_annot_free_text_set_quadding (PopplerAnnotFreeText         *poppler_annot,
+                                      PopplerAnnotFreeTextQuadding  quadding)
+{
+  AnnotFreeText *annot;
+
+  g_return_if_fail (POPPLER_IS_ANNOT_FREE_TEXT (poppler_annot));
+
+  annot = static_cast<AnnotFreeText *>(POPPLER_ANNOT (poppler_annot)->annot);
+  annot->setQuadding ((AnnotFreeText::AnnotFreeTextQuadding) quadding);
+}
+
+/**
+ * poppler_annot_free_text_get_intent:
+ * @poppler_annot: a #PopplerAnnotFreeText
+ * @intent: a #PopplerAnnotFreeTextIntent
+ *
+ * Returns:  the intent of the text of @poppler_annot.
+ * Since: 0.28
+ **/
+PopplerAnnotFreeTextIntent
+poppler_annot_free_text_get_intent (PopplerAnnotFreeText *poppler_annot)
+{
+  AnnotFreeText *annot;
+
+  g_return_val_if_fail (POPPLER_IS_ANNOT_FREE_TEXT (poppler_annot), POPPLER_ANNOT_FREE_TEXT_INTENT_FREE_TEXT);
+
+  annot = static_cast<AnnotFreeText *>(POPPLER_ANNOT (poppler_annot)->annot);
+  return (PopplerAnnotFreeTextIntent) annot->getIntent ();
+}
+
+/**
+ * poppler_annot_free_text_set_intent:
+ * @poppler_annot: a #PopplerAnnotFreeText
+ * @intent: a #PopplerAnnotFreeTextIntent
+ *
+ * Sets the intent of the text of @poppler_annot.
+ * Since: 0.28
+ **/
+void
+poppler_annot_free_text_set_intent (PopplerAnnotFreeText      *poppler_annot,
+                                    PopplerAnnotFreeTextIntent intent)
+{
+  AnnotFreeText *annot;
+
+  g_return_if_fail (POPPLER_IS_ANNOT_FREE_TEXT (poppler_annot));
+
+  annot = static_cast<AnnotFreeText *>(POPPLER_ANNOT (poppler_annot)->annot);
+  annot->setIntent ((AnnotFreeText::AnnotFreeTextIntent) intent);
+}
+
+/**
  * poppler_annot_free_text_get_callout_line:
  * @poppler_annot: a #PopplerAnnotFreeText
  *
@@ -1700,6 +1846,134 @@ poppler_annot_free_text_get_callout_line (PopplerAnnotFreeText *poppler_annot)
   }
 
   return NULL;
+}
+
+/**
+ * poppler_annot_free_text_set_callout_line:
+ * @poppler_annot: a #PopplerAnnotFreeText
+ * @callout: (allow-none): a #PopplerAnnotCalloutLine
+ *
+ * Sets the callout line of the text of @poppler_annot to @callout,
+ * or removes the callout line if %NULL
+ *
+ * Since: 0.28
+ **/
+void
+poppler_annot_free_text_set_callout_line (PopplerAnnotFreeText    *poppler_annot,
+                                          PopplerAnnotCalloutLine *callout)
+{
+  AnnotFreeText *annot;
+  AnnotCalloutLine *line = NULL;
+
+  g_return_if_fail (POPPLER_IS_ANNOT_FREE_TEXT (poppler_annot));
+
+  if (callout != NULL) {
+    if (callout->multiline) {
+      line = new AnnotCalloutMultiLine (callout->x1, callout->y1,
+                                        callout->x2, callout->y2,
+                                        callout->x3, callout->y3);
+    } else {
+      line = new AnnotCalloutLine (callout->x1, callout->y1,
+                                   callout->x2, callout->y2);
+    }
+  }
+
+  annot = static_cast<AnnotFreeText *>(POPPLER_ANNOT (poppler_annot)->annot);
+  annot->setCalloutLine (line);
+  if (line)
+    delete line;
+}
+
+static void
+poppler_annot_free_text_set_appearance_string (PopplerAnnotFreeText *poppler_annot)
+{
+  AnnotFreeText *annot;
+  GooString     *da;
+
+  annot = static_cast<AnnotFreeText *>(POPPLER_ANNOT (poppler_annot)->annot);
+  da = create_appearance_string (poppler_annot->font);
+  annot->setAppearanceString(da);
+  delete da;
+}
+
+/**
+ * poppler_annot_free_text_get_font_size:
+ * @poppler_annot: a #PopplerAnnotFreeText
+ *
+ * Retrieves the font size of @poppler_annot.
+ *
+ * Return value: The font size of the @poppler_annot.
+ * Since: 0.28
+ **/
+gdouble
+poppler_annot_free_text_get_font_size (PopplerAnnotFreeText *poppler_annot)
+{
+  g_return_val_if_fail (POPPLER_IS_ANNOT_FREE_TEXT (poppler_annot), -1);
+
+  return poppler_annot->font->size;
+}
+
+/**
+ * poppler_annot_free_text_set_font_size:
+ * @poppler_annot: a #PopplerAnnotFreeText
+ * @size: a gdouble
+ *
+ * Sets the font size of the @poppler_annot to @size.
+ *
+ * Since: 0.28
+ **/
+void
+poppler_annot_free_text_set_font_size (PopplerAnnotFreeText *poppler_annot,
+                                       gdouble               size)
+{
+  g_return_if_fail (POPPLER_IS_ANNOT_FREE_TEXT (poppler_annot));
+
+  poppler_annot->font->size = size;
+  poppler_annot_free_text_set_appearance_string (poppler_annot);
+}
+
+/**
+ * poppler_annot_free_text_get_font_color:
+ * @poppler_annot: a #PopplerAnnotFreeText
+ *
+ * Retrieves the font color of @poppler_annot.
+ *
+ * Return value: (transfer none): a #PopplerColor with the font color
+ *                values of @poppler_annot, or %NULL.
+ * Since: 0.28
+ **/
+PopplerColor *
+poppler_annot_free_text_get_font_color (PopplerAnnotFreeText *poppler_annot)
+{
+  g_return_val_if_fail (POPPLER_IS_ANNOT_FREE_TEXT (poppler_annot), NULL);
+
+  return poppler_annot->font->color;
+}
+
+/**
+ * poppler_annot_free_text_set_font_color:
+ * @poppler_annot: a #PopplerAnnotFreeText
+ * @poppler_color: (allow-none): a #PopplerColor, or %NULL
+ *
+ * Sets the color of @poppler_annot to @poppler_color, or if %NULL,
+ * sets the color to the default value.
+ *
+ * Since: 0.28
+ */
+void
+poppler_annot_free_text_set_color (PopplerAnnotFreeText *poppler_annot,
+                                   PopplerColor         *poppler_color)
+{
+  g_return_if_fail (POPPLER_IS_ANNOT_FREE_TEXT (poppler_annot));
+
+  if (!poppler_color) {
+    g_free (poppler_annot->font->color);
+    poppler_annot->font->color = NULL;
+  } else {
+    *poppler_annot->font->color = *poppler_color;
+  }
+
+  poppler_annot_free_text_set_appearance_string (poppler_annot);
 }
 
 /* PopplerAnnotFileAttachment */
