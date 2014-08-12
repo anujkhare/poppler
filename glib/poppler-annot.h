@@ -65,6 +65,7 @@ G_BEGIN_DECLS
 
 #define POPPLER_TYPE_ANNOT_CALLOUT_LINE      (poppler_annot_callout_line_get_type ())
 #define POPPLER_TYPE_FONT_DESCRIPTION        (poppler_font_description_get_type ())
+#define POPPLER_TYPE_ANNOT_BORDER            (poppler_annot_border_get_type ())
 
 #define POPPLER_TYPE_ANNOT_CIRCLE            (poppler_annot_circle_get_type ())
 #define POPPLER_ANNOT_CIRCLE(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), POPPLER_TYPE_ANNOT_CIRCLE, PopplerAnnotCircle))
@@ -183,6 +184,21 @@ struct _PopplerFontDescription
   PopplerColor *color;
   gdouble       size;
   gchar        *name;
+};
+
+typedef enum
+{
+  POPPLER_ANNOT_BORDER_TYPE_SOLID,
+  POPPLER_ANNOT_BORDER_TYPE_DASHED,
+  POPPLER_ANNOT_BORDER_TYPE_BEVELED,
+  POPPLER_ANNOT_BORDER_TYPE_INSET,
+  POPPLER_ANNOT_BORDER_TYPE_UNDERLINED
+} PopplerAnnotBorderStyle;
+
+struct _PopplerAnnotBorder
+{
+  PopplerAnnotBorderStyle style;
+  gdouble                 width;
 };
 
 GType                         poppler_annot_get_type                           (void) G_GNUC_CONST;
@@ -312,6 +328,12 @@ GType                         poppler_font_description_get_type                (
 PopplerFontDescription       *poppler_font_description_new                     (void);
 PopplerFontDescription       *poppler_font_description_copy                    (PopplerFontDescription *font);
 void                          poppler_font_description_free                    (PopplerFontDescription *font);
+
+/* PopplerAnnotBorder */
+GType                         poppler_annot_border_get_type                    (void) G_GNUC_CONST;
+PopplerAnnotBorder           *poppler_annot_border_new                         (void);
+PopplerAnnotBorder           *poppler_annot_border_copy                        (PopplerAnnotBorder *border);
+void                          poppler_annot_border_free                        (PopplerAnnotBorder *border);
 
 /* PopplerAnnotCircle */
 GType                         poppler_annot_circle_get_type                    (void) G_GNUC_CONST;

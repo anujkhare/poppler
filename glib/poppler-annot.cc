@@ -2149,6 +2149,60 @@ poppler_font_description_free (PopplerFontDescription *font)
   g_free (font);
 }
 
+/* PopplerAnnotBorder */
+POPPLER_DEFINE_BOXED_TYPE (PopplerAnnotBorder, poppler_annot_border,
+                           poppler_annot_border_copy,
+                           poppler_annot_border_free)
+
+/**
+ * poppler_annot_border_new:
+ *
+ * Creates a new empty #PopplerAnnotBorder.
+ *
+ * Return value: a new allocated #PopplerAnnotBorder, %NULL in other case.
+ *               It must be freed with poppler_annot_border_free when done.
+ **/
+PopplerAnnotBorder *
+poppler_annot_border_new (void)
+{
+  return g_new0 (PopplerAnnotBorder, 1);
+}
+
+/**
+ * poppler_annot_border_copy:
+ * @font: the #PopplerAnnotBorder to be copied.
+ *
+ * It does copy @font to a new #PopplerAnnotBorder.
+ *
+ * Return value: a new allocated #PopplerAnnotBorder as exact copy of
+ *               @font, %NULL in other case. It must be freed with
+                 poppler_annot_border_free when done.
+ **/
+PopplerAnnotBorder *
+poppler_annot_border_copy (PopplerAnnotBorder *border)
+{
+  PopplerAnnotBorder *new_border;
+
+  g_return_val_if_fail (border != NULL, NULL);
+
+  new_border = g_new0 (PopplerAnnotBorder, 1);
+
+  *new_border = *border;
+  return new_border;
+}
+
+/**
+ * poppler_annot_border_free:
+ * @border: a #PopplerAnnotBorder
+ *
+ * Frees the memory used by #PopplerAnnotBorder.
+ **/
+void
+poppler_annot_border_free (PopplerAnnotBorder *border)
+{
+  g_free (border);
+}
+
 
 
 /* PopplerAnnotMovie */
