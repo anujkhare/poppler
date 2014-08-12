@@ -188,11 +188,11 @@ struct _PopplerFontDescription
 
 typedef enum
 {
-  POPPLER_ANNOT_BORDER_TYPE_SOLID,
-  POPPLER_ANNOT_BORDER_TYPE_DASHED,
-  POPPLER_ANNOT_BORDER_TYPE_BEVELED,
-  POPPLER_ANNOT_BORDER_TYPE_INSET,
-  POPPLER_ANNOT_BORDER_TYPE_UNDERLINED
+  POPPLER_ANNOT_BORDER_STYLE_SOLID,
+  POPPLER_ANNOT_BORDER_STYLE_DASHED,
+  POPPLER_ANNOT_BORDER_STYLE_BEVELED,
+  POPPLER_ANNOT_BORDER_STYLE_INSET,
+  POPPLER_ANNOT_BORDER_STYLE_UNDERLINED
 } PopplerAnnotBorderStyle;
 
 struct _PopplerAnnotBorder
@@ -214,6 +214,9 @@ void                          poppler_annot_set_flags                          (
 PopplerColor                 *poppler_annot_get_color                          (PopplerAnnot *poppler_annot);
 void                          poppler_annot_set_color                          (PopplerAnnot *poppler_annot,
 										PopplerColor *poppler_color);
+PopplerAnnotBorder           *poppler_annot_get_border                         (PopplerAnnot *poppler_annot);
+void                          poppler_annot_set_border                         (PopplerAnnot       *poppler_annot,
+                                                                                PopplerAnnotBorder *poppler_border);
 gint                          poppler_annot_get_page_index                     (PopplerAnnot *poppler_annot);
 void                          poppler_annot_get_rectangle                      (PopplerAnnot     *poppler_annot,
 										PopplerRectangle *poppler_rect);

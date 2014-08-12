@@ -1080,6 +1080,65 @@ poppler_annot_set_color (PopplerAnnot *poppler_annot,
 }
 
 /**
+ * poppler_annot_get_border:
+ * @poppler_annot: a #PopplerAnnot
+ *
+ * Retrieves the border of @poppler_annot.
+ *
+ * Return value: a new allocated #PopplerAnnotBorder with the border values of
+ *               @poppler_annot, or %NULL. It must be freed with g_free() when done.
+ *
+ * Since: 0.28
+ **/
+PopplerAnnotBorder *
+poppler_annot_get_border (PopplerAnnot *poppler_annot)
+{
+  AnnotBorder        *annot_border;
+  PopplerAnnotBorder *poppler_border = NULL;
+
+  g_return_val_if_fail (POPPLER_IS_ANNOT (poppler_annot), NULL);
+
+  annot_border = poppler_annot->annot->getBorder();
+
+  if (annot_border) {
+    poppler_border = poppler_annot_border_new ();
+    poppler_border->width = annot_border->getWidth();
+    poppler_border->style = (PopplerAnnotBorderStyle) annot_border->getStyle();
+  }
+
+  return poppler_border;
+}
+
+/**
+ * poppler_annot_set_border:
+ * @poppler_annot: a #PopplerAnnot
+ * @poppler_border: (allow-none): a #PopplerBorder, or %NULL
+ *
+ * Sets the border of @poppler_annot.
+ *
+ * Since: 0.28
+ */
+void
+poppler_annot_set_border (PopplerAnnot       *poppler_annot,
+                          PopplerAnnotBorder *poppler_border)
+{
+  AnnotBorder *border;
+
+  g_return_if_fail (POPPLER_IS_ANNOT (poppler_annot));
+
+  if (poppler_border) {
+    /* Only supports Border Array as of now */
+    border = new AnnotBorderArray ();
+    border->setWidth (poppler_border->width);
+  } else {
+    border = NULL;
+  }
+
+  /* Annot takes ownership of the border */
+  poppler_annot->annot->setBorder (border);
+}
+
+/**
  * poppler_annot_get_page_index:
  * @poppler_annot: a #PopplerAnnot
  *
