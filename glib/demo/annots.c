@@ -548,6 +548,7 @@ pgd_annot_view_set_annot_free_text (GtkWidget            *table,
     pgd_table_add_property (GTK_GRID (table), "<b>Font Size:</b>", get_free_text_font_size (annot), row);
     pgd_table_add_property (GTK_GRID (table), "<b>Font Color:</b>", get_free_text_font_color (annot), row);
     pgd_table_add_property (GTK_GRID (table), "<b>Intent:</b>", get_free_text_intent (annot), row);
+    pgd_table_add_property (GTK_GRID (table), "<b>Border:</b>", get_free_text_border (annot), row);
 
     text = get_free_text_callout_line (annot);
     pgd_table_add_property (GTK_GRID (table), "<b>Callout:</b>", text, row);
@@ -654,6 +655,41 @@ pgd_annot_view_set_annot_screen (GtkWidget          *table,
     gtk_widget_show (action_view);
 }
 
+const gchar *
+get_annot_border (PopplerAnnot *poppler_annot)
+{
+    PopplerAnnotBorder *poppler_border;
+    const gchar        *text;
+    gchar              *style;
+
+    poppler_border = poppler_annot_get_border (poppler_annot);
+
+    switch (poppler_border->style) {
+        case POPPLER_ANNOT_BORDER_STYLE_SOLID:
+            style = g_strdup_printf ("Solid");
+            break;
+        case POPPLER_ANNOT_BORDER_STYLE_DASHED:
+            style = g_strdup_printf ("Dashed");
+            break;
+        case POPPLER_ANNOT_BORDER_STYLE_BEVELED:
+            style= g_strdup_printf ("Beveled");
+            break;
+        case POPPLER_ANNOT_BORDER_STYLE_INSET:
+            style = g_strdup_printf ("Inset");
+            break;
+        case POPPLER_ANNOT_BORDER_STYLE_UNDERLINED:
+            style = g_strdup_printf ("Underlined");
+            break;
+        default:
+            style = g_strdup_printf ("Unknown");
+    }
+
+    text = g_strdup_printf ("Width: %.2f, Style: %s", poppler_border->width, style);
+    poppler_annot_border_free (poppler_border);
+    g_free (style);
+    return text;
+}
+
 static void
 pgd_annot_view_set_annot (PgdAnnotsDemo *demo,
                           PopplerAnnot  *annot)
@@ -701,6 +737,10 @@ pgd_annot_view_set_annot (PgdAnnotsDemo *demo,
     poppler_annot_get_rectangle (annot, &rect);
     text = g_strdup_printf ("(%.2f;%.2f) (%.2f;%.2f)", rect.x1, rect.y1, rect.x2, rect.y2);
     pgd_table_add_property (GTK_GRID (table), "<b>Coords:</b>", text, &row);
+    g_free (text);
+
+    text = get_annot_border (annot);
+    pgd_table_add_property (GTK_GRID (table), "<b>Border:</b>", text, &row);
     g_free (text);
 
     if (POPPLER_IS_ANNOT_MARKUP (annot))
