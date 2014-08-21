@@ -323,7 +323,7 @@ get_free_text_font_color (PopplerAnnotFreeText *poppler_annot)
     poppler_color = poppler_annot_free_text_get_font_color (poppler_annot);
 
     if (!poppler_color)
-        return "";
+        return g_strdup_printf ("");
 
     return g_strdup_printf ("Red - %d, Blue - %d, Green - %d", poppler_color->red,
                              poppler_color->blue, poppler_color->green);
@@ -545,11 +545,14 @@ pgd_annot_view_set_annot_free_text (GtkWidget            *table,
     gchar *text;
 
     pgd_table_add_property (GTK_GRID (table), "<b>Quadding:</b>", get_free_text_quadding (annot), row);
-    pgd_table_add_property (GTK_GRID (table), "<b>Font Size:</b>", get_free_text_font_size (annot), row);
-    pgd_table_add_property (GTK_GRID (table), "<b>Font Color:</b>", get_free_text_font_color (annot), row);
+    text = get_free_text_font_size (annot);
+    pgd_table_add_property (GTK_GRID (table), "<b>Font Size:</b>", text, row);
+    g_free (text);
+    text = get_free_text_font_color (annot);
+    pgd_table_add_property (GTK_GRID (table), "<b>Font Color:</b>", text, row);
+    g_free (text);
     pgd_table_add_property (GTK_GRID (table), "<b>Intent:</b>", get_free_text_intent (annot), row);
     pgd_table_add_property (GTK_GRID (table), "<b>Border:</b>", get_free_text_border (annot), row);
-
     text = get_free_text_callout_line (annot);
     pgd_table_add_property (GTK_GRID (table), "<b>Callout:</b>", text, row);
     g_free (text);
