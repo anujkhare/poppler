@@ -552,7 +552,6 @@ pgd_annot_view_set_annot_free_text (GtkWidget            *table,
     pgd_table_add_property (GTK_GRID (table), "<b>Font Color:</b>", text, row);
     g_free (text);
     pgd_table_add_property (GTK_GRID (table), "<b>Intent:</b>", get_free_text_intent (annot), row);
-    pgd_table_add_property (GTK_GRID (table), "<b>Border:</b>", get_free_text_border (annot), row);
     text = get_free_text_callout_line (annot);
     pgd_table_add_property (GTK_GRID (table), "<b>Callout:</b>", text, row);
     g_free (text);
