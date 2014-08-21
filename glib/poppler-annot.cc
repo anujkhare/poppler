@@ -2017,26 +2017,20 @@ poppler_annot_free_text_get_font_color (PopplerAnnotFreeText *poppler_annot)
  *
  * Sets the color of @poppler_annot to @poppler_color, or if %NULL,
  * sets the color to the default value.
+ * Annotation takes ownership of @poppler_color.
  *
  * Since: 0.28
  */
 void
-poppler_annot_free_text_set_color (PopplerAnnotFreeText *poppler_annot,
-                                   PopplerColor         *poppler_color)
+poppler_annot_free_text_set_font_color (PopplerAnnotFreeText *poppler_annot,
+                                        PopplerColor         *poppler_color)
 {
   PopplerFontDescription *font;
   g_return_if_fail (POPPLER_IS_ANNOT_FREE_TEXT (poppler_annot));
 
   font = poppler_annot->font;
-  if (!poppler_color && font->color) {
-    g_free (font->color);
-    font->color = NULL;
-
-  } else {
-    if (!font->color)
-      font->color = poppler_color_new ();
-    *font->color = *poppler_color;
-  }
+  g_free (font->color);
+  font->color = poppler_color;
 
   poppler_annot_free_text_set_appearance_string (poppler_annot);
 }
